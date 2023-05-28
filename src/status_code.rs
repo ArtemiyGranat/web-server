@@ -2,7 +2,7 @@ pub struct StatusCode(u16);
 
 impl StatusCode {
     pub fn new(code: u16) -> Self {
-        Self { 0: code }
+        Self(code)
     }
 
     pub fn code(&self) -> u16 {

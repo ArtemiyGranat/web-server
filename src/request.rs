@@ -36,12 +36,12 @@ impl Request {
             .to_string();
 
         let mut headers = Vec::new();
-        while let Some(header_line) = lines.next() {
+        for header_line in lines.by_ref() {
             if header_line.trim().is_empty() {
                 break;
             }
 
-            let mut parts = header_line.split(":");
+            let mut parts = header_line.split(':');
             let name = parts
                 .next()
                 .ok_or("Invalid header")?
