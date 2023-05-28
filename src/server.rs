@@ -15,6 +15,7 @@ pub struct Server {
     logger: Logger,
 }
 
+// TODO: Do I need this?
 impl Default for Server {
     fn default() -> Self {
         Self {
@@ -74,7 +75,7 @@ impl Server {
             return;
         }
         let raw_request = String::from_utf8_lossy(&buffer);
-        let request = Request::parse(&raw_request);
+        let request = Request::new(&raw_request);
         if let Err(e) = request {
             self.logger
                 .error(format!("Could not parse a request from {}: {}", addr, e));
@@ -89,7 +90,7 @@ impl Server {
                 .error(format!("Could not write to stream: {}", e));
             return;
         }
-        
+
         self.logger.request_completed(&addr, &response);
         if let Err(e) = stream.flush() {
             self.logger.error(format!("Could not flush stream: {}", e));

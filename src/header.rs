@@ -6,6 +6,7 @@ pub struct Header {
     value: String,
 }
 
+// TODO: Do I really need this?
 impl FromStr for Header {
     type Err = ();
 

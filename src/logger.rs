@@ -6,10 +6,12 @@ use crate::{request::Request, response::Response};
 pub enum LogLevel {
     Debug,
     Info,
+    // TODO: Do I need warning level?
     Warning,
     Error,
 }
 
+// TODO: Optimize it somehow
 impl LogLevel {
     pub fn as_str(&self) -> &str {
         match self {

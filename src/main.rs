@@ -3,6 +3,7 @@ use server::Server;
 
 mod file_handler;
 mod header;
+mod logger;
 mod method;
 mod request;
 mod response;
@@ -10,7 +11,6 @@ mod router;
 mod server;
 mod status_code;
 mod utils;
-mod logger;
 // mod error;
 
 #[derive(Parser, Debug)]

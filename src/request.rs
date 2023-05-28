@@ -5,16 +5,15 @@ use crate::{header::Header, method::Method};
 pub struct Request {
     method: Method,
     target: String,
-    // Should I use HTTP version equals 1.1 or parse it from request?...
+    // Should I always use HTTP version equals 1.1 or parse it from request?...
     // protocol: String,
     headers: Vec<Header>,
     body: String,
 }
 
 impl Request {
-    // TODO: Error logging without panicking, HTTP version handling and
-    // code refactoring
-    pub fn parse(raw_request: &str) -> Result<Self, &str> {
+    // TODO: HTTP version handling and code refactoring
+    pub fn new(raw_request: &str) -> Result<Self, &str> {
         let mut lines = raw_request.lines();
 
         let mut request_line = lines

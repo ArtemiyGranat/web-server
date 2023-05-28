@@ -20,7 +20,6 @@ impl Response {
         for header in headers {
             response.add_header(header)
         }
-
         response
     }
 
