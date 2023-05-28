@@ -9,39 +9,23 @@ use std::{
 };
 
 pub struct Server {
-    address: String,
-    port: u16,
     router: Router,
     logger: Logger,
 }
 
-// TODO: Do I need this?
-impl Default for Server {
-    fn default() -> Self {
-        Self {
-            address: "localhost".to_string(),
-            port: 8080,
-            router: Router::new(),
-            logger: Logger::new(LogLevel::Debug),
-        }
-    }
-}
-
 impl Server {
-    pub fn new(address: &String, port: u16) -> Self {
+    pub fn new() -> Self {
         Self {
-            address: address.to_string(),
-            port,
             router: Router::new(),
             logger: Logger::new(LogLevel::Debug).colored(),
         }
     }
 
-    pub fn run(&self) {
-        match TcpListener::bind((self.address.clone(), self.port)) {
+    pub fn run(&self, address: &str, port: u16) {
+        match TcpListener::bind((address, port)) {
             Ok(listener) => {
                 self.logger
-                    .info(format!("Server is listening at port {}", self.port));
+                    .info(format!("Server is listening at port {}", port));
                 for stream in listener.incoming() {
                     match stream {
                         Ok(stream) => self.handle_connection(stream),

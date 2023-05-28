@@ -26,6 +26,6 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let server = Server::new(&args.address, args.port);
-    server.run();
+    let server = Server::new();
+    server.run(&args.address, args.port);
 }
