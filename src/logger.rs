@@ -1,5 +1,7 @@
 use chrono::Local;
 
+use crate::{request::Request, response::Response};
+
 #[derive(PartialEq, PartialOrd)]
 pub enum LogLevel {
     Debug,
@@ -78,5 +80,23 @@ impl Logger {
 
     pub fn error(&self, msg: String) {
         self.log(LogLevel::Error, msg);
+    }
+
+    pub fn request_received(&self, addr: &str, request: &Request) {
+        self.info(format!(
+            "[{}] Incoming request: {} {}",
+            addr,
+            request.method().as_str(),
+            request.target()
+        ));
+    }
+
+    pub fn request_completed(&self, addr: &str, response: &Response) {
+        self.info(format!(
+            "[{}] Request completed with {} {}",
+            addr,
+            response.status_code().code(),
+            response.status_code().description()
+        ));
     }
 }

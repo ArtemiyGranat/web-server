@@ -82,27 +82,15 @@ impl Server {
         }
         let request = request.unwrap();
 
-        self.logger.info(format!(
-            "[{}] Started {} {}",
-            addr,
-            request.method().as_str(),
-            request.target()
-        ));
-
+        self.logger.request_received(&addr, &request);
         let response = self.router.handle_request(&request);
         if let Err(e) = stream.write_all(response.to_string().as_bytes()) {
             self.logger
                 .error(format!("Could not write to stream: {}", e));
             return;
         }
-
-        self.logger.info(format!(
-            "[{}] Completed with {} {}",
-            addr,
-            response.status_code().code(),
-            response.status_code().description()
-        ));
-
+        
+        self.logger.request_completed(&addr, &response);
         if let Err(e) = stream.flush() {
             self.logger.error(format!("Could not flush stream: {}", e));
         }
