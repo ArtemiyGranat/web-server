@@ -1,9 +1,9 @@
-use std::collections::HashMap;
+use crate::header::Header;
 
 struct Request {
     method: String,
     target: String,
     protocol: String,
-    headers: HashMap<String, String>,
+    headers: Vec<Header>,
     body: String,
 }

@@ -1,3 +1,4 @@
+use crate::{header::Header, response::Response};
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -47,10 +48,16 @@ impl Server {
         stream
             .read(&mut buffer)
             .expect("Could not read from stream");
-
-        let response = b"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, World!";
+        let response = Response::new(
+            200,
+            vec![Header::new(
+                "Content-Type".to_string(),
+                "text/plain".to_string(),
+            )],
+            "Hello, world!".to_string(),
+        );
         stream
-            .write_all(response)
+            .write_all(response.to_string().as_bytes())
             .expect("Could not write to stream");
 
         stream.flush().expect("Could not flush stream");
