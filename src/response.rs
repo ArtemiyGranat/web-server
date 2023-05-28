@@ -20,13 +20,16 @@ impl Response {
         for header in headers {
             response.add_header(header)
         }
-
         response
     }
 
     // TODO: Add checks for forbidden headers
     pub fn add_header(&mut self, header: Header) {
         self.headers.push(header)
+    }
+
+    pub fn status_code(&self) -> &StatusCode {
+        &self.status_code
     }
 }
 

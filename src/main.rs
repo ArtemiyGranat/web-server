@@ -3,6 +3,7 @@ use server::Server;
 
 mod file_handler;
 mod header;
+mod logger;
 mod method;
 mod request;
 mod response;

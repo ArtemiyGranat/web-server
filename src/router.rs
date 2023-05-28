@@ -23,7 +23,9 @@ impl Router {
         todo!()
     }
 
-    // TODO: Implement this
+    // TODO: Improve this method
+    // Need to implement Post, Put, Delete etc handling and redirect from 
+    // "/" to "/index.html" maybe so it won't be 500 status code
     pub fn handle_request(&self, request: &Request) -> Response {
         match request.method() {
             Method::Get => {
@@ -35,12 +37,12 @@ impl Router {
 
                 match read_file(target) {
                     Ok(content) => Response::new(status_code, Vec::new(), content),
-                    Err(_) => Response::new(500, Vec::new(), String::from("500 Internal Server Error")),
+                    Err(_) => {
+                        Response::new(500, Vec::new(), String::from("500 Internal Server Error"))
+                    }
                 }
             }
-            Method::Unknown => {
-                Response::new(400, Vec::new(), String::from("400 Bad Request"))
-            }
+            _ => Response::new(400, Vec::new(), String::from("400 Bad Request")),
         }
     }
 }

@@ -1,4 +1,8 @@
-use crate::{request::Request, router::Router};
+use crate::{
+    logger::{LogLevel, Logger},
+    request::Request,
+    router::Router,
+};
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -8,14 +12,17 @@ pub struct Server {
     address: String,
     port: u16,
     router: Router,
+    logger: Logger,
 }
 
+// TODO: Do I need this?
 impl Default for Server {
     fn default() -> Self {
         Self {
             address: "localhost".to_string(),
             port: 8080,
             router: Router::new(),
+            logger: Logger::new(LogLevel::Debug),
         }
     }
 }
@@ -26,38 +33,67 @@ impl Server {
             address: address.to_string(),
             port,
             router: Router::new(),
+            logger: Logger::new(LogLevel::Debug).colored(),
         }
     }
 
     pub fn run(&self) {
         match TcpListener::bind((self.address.clone(), self.port)) {
             Ok(listener) => {
-                println!("Server is listening at port {}", self.port);
+                self.logger
+                    .info(format!("Server is listening at port {}", self.port));
                 for stream in listener.incoming() {
                     match stream {
                         Ok(stream) => self.handle_connection(stream),
-                        Err(e) => panic!("{}", e),
+                        Err(e) => self
+                            .logger
+                            .error(format!("Could not accept connection: {}", e)),
                     }
                 }
             }
             Err(e) => {
-                panic!("Could not bind a socket: {}", e);
+                self.logger.error(format!("Could not bind a socket: {}", e));
             }
         }
     }
 
     // TODO: Add non-blocking I/O operations
     fn handle_connection(&self, mut stream: TcpStream) {
-        let mut buffer = [0; 1024];
-        stream
-            .read(&mut buffer)
-            .expect("Could not read from stream");
-        let request = Request::parse(&String::from_utf8(buffer.to_vec()).unwrap());
-        let response = self.router.handle_request(&request);
-        stream
-            .write_all(response.to_string().as_bytes())
-            .expect("Could not write to stream");
+        let addr = match stream.peer_addr() {
+            Ok(addr) => addr.ip().to_string(),
+            Err(e) => {
+                self.logger
+                    .error(format! {"Failed to detect IP address: {}", e});
+                return;
+            }
+        };
 
-        stream.flush().expect("Could not flush stream");
+        let mut buffer = [0; 1024];
+        if let Err(e) = stream.read(&mut buffer) {
+            self.logger
+                .error(format!("Could not read from stream: {}", e));
+            return;
+        }
+        let raw_request = String::from_utf8_lossy(&buffer);
+        let request = Request::new(&raw_request);
+        if let Err(e) = request {
+            self.logger
+                .error(format!("Could not parse a request from {}: {}", addr, e));
+            return;
+        }
+        let request = request.unwrap();
+
+        self.logger.request_received(&addr, &request);
+        let response = self.router.handle_request(&request);
+        if let Err(e) = stream.write_all(response.to_string().as_bytes()) {
+            self.logger
+                .error(format!("Could not write to stream: {}", e));
+            return;
+        }
+
+        self.logger.request_completed(&addr, &response);
+        if let Err(e) = stream.flush() {
+            self.logger.error(format!("Could not flush stream: {}", e));
+        }
     }
 }
