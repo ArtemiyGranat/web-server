@@ -6,11 +6,11 @@ mod header;
 mod method;
 mod request;
 mod response;
+mod router;
 mod server;
 mod status_code;
 mod utils;
 // mod error;
-// mod router;
 
 #[derive(Parser, Debug)]
 struct Args {
