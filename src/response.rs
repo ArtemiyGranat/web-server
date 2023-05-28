@@ -31,6 +31,7 @@ impl Response {
 }
 
 impl ToString for Response {
+    // TODO: Is there a better way to do this?
     fn to_string(&self) -> String {
         let mut response = String::new();
 

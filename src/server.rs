@@ -1,4 +1,4 @@
-use crate::{header::Header, response::Response, file_handler::read_file};
+use crate::{header::Header, response::Response, file_handler::read_file, request::Request};
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -49,6 +49,7 @@ impl Server {
         stream
             .read(&mut buffer)
             .expect("Could not read from stream");
+        let request = Request::parse(&String::from_utf8(buffer.to_vec()).unwrap());
         let response = Response::new(
             200,
             vec![Header::new(
