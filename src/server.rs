@@ -1,4 +1,8 @@
-use crate::{request::Request, router::Router};
+use crate::{
+    logger::{LogLevel, Logger},
+    request::Request,
+    router::Router,
+};
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -8,6 +12,7 @@ pub struct Server {
     address: String,
     port: u16,
     router: Router,
+    logger: Logger,
 }
 
 impl Default for Server {
@@ -16,6 +21,7 @@ impl Default for Server {
             address: "localhost".to_string(),
             port: 8080,
             router: Router::new(),
+            logger: Logger::new(LogLevel::Debug),
         }
     }
 }
@@ -26,6 +32,7 @@ impl Server {
             address: address.to_string(),
             port,
             router: Router::new(),
+            logger: Logger::new(LogLevel::Debug),
         }
     }
 

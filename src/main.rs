@@ -10,6 +10,7 @@ mod router;
 mod server;
 mod status_code;
 mod utils;
+mod logger;
 // mod error;
 
 #[derive(Parser, Debug)]
