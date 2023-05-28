@@ -27,15 +27,20 @@ impl Router {
     pub fn handle_request(&self, request: &Request) -> Response {
         match request.method() {
             Method::Get => {
-                let response: Response;
-                if file_exists(&request.target()) {
-                    response = Response::new(200, Vec::new(), read_file(request.target()).unwrap());
+                let (status_code, target) = if file_exists(request.target()) {
+                    (200, request.target())
                 } else {
-                    response = Response::new(404, Vec::new(), read_file("404.html").unwrap());
+                    (404, "404.html")
+                };
+
+                match read_file(target) {
+                    Ok(content) => Response::new(status_code, Vec::new(), content),
+                    Err(_) => Response::new(500, Vec::new(), String::from("500 Internal Server Error")),
                 }
-                response
             }
-            Method::Unknown => todo!(),
+            Method::Unknown => {
+                Response::new(400, Vec::new(), String::from("400 Bad Request"))
+            }
         }
     }
 }

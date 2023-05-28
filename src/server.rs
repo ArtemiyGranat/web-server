@@ -1,6 +1,4 @@
-use crate::{
-    file_handler::read_file, header::Header, request::Request, response::Response, router::Router,
-};
+use crate::{request::Request, router::Router};
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
