@@ -1,13 +1,13 @@
 use clap::Parser;
 use server::Server;
 
-// mod error;
 mod header;
 mod request;
 mod response;
-// mod router;
 mod server;
 mod utils;
+// mod error;
+// mod router;
 
 #[derive(Parser, Debug)]
 struct Args {

@@ -1,4 +1,6 @@
 use crate::header::Header;
+use crate::utils::CRLF;
+use std::fmt::Write;
 
 pub struct Response {
     status_code: u16,
@@ -23,12 +25,22 @@ impl Response {
 
     // TODO: Add checks for forbidden headers
     pub fn add_header(&mut self, header: Header) {
-        todo!()
+        self.headers.push(header)
     }
 }
 
 impl ToString for Response {
     fn to_string(&self) -> String {
-        todo!()
+        let mut response = String::new();
+
+        write!(response, "HTTP/1.1 {} OK{}", self.status_code, CRLF).unwrap();
+        for header in &self.headers {
+            write!(response, "{}: {}{}", header.name, header.value, CRLF).unwrap();
+        }
+
+        write!(response, "{}", CRLF).unwrap();
+        write!(response, "{}", self.body).unwrap();
+
+        response
     }
 }
