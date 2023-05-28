@@ -39,7 +39,8 @@ impl Server {
     pub fn run(&self) {
         match TcpListener::bind((self.address.clone(), self.port)) {
             Ok(listener) => {
-                println!("Server is listening at port {}", self.port);
+                self.logger
+                    .info(format!("Server is listening at port {}", self.port));
                 for stream in listener.incoming() {
                     match stream {
                         Ok(stream) => self.handle_connection(stream),

@@ -1,3 +1,5 @@
+use chrono::Local;
+
 #[derive(PartialEq, PartialOrd)]
 pub enum LogLevel {
     Debug,
@@ -18,7 +20,7 @@ impl LogLevel {
 }
 
 pub struct Logger {
-    level: LogLevel
+    level: LogLevel,
 }
 
 impl Logger {
@@ -26,25 +28,26 @@ impl Logger {
         Self { level }
     }
 
-    pub fn log(&self, level: LogLevel, msg: &str) {
+    pub fn log(&self, level: LogLevel, msg: String) {
         if level >= self.level {
-            println!("[{}] {}", level.as_str(), msg)
+            let current_time = Local::now().format("%d-%m-%Y %H:%M:%S");
+            println!("[{}] [{}] {}", current_time, level.as_str(), msg)
         }
     }
 
-    pub fn debug(&self, msg: &str) {
+    pub fn debug(&self, msg: String) {
         self.log(LogLevel::Debug, msg);
     }
 
-    pub fn info(&self, msg: &str) {
+    pub fn info(&self, msg: String) {
         self.log(LogLevel::Info, msg);
     }
 
-    pub fn warning(&self, msg: &str) {
+    pub fn warning(&self, msg: String) {
         self.log(LogLevel::Warning, msg);
     }
 
-    pub fn error(&self, msg: &str) {
+    pub fn error(&self, msg: String) {
         self.log(LogLevel::Error, msg);
     }
 }
