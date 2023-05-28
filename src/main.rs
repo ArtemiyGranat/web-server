@@ -1,13 +1,14 @@
 use clap::Parser;
 use server::Server;
 
+mod file_handler;
 mod header;
+mod method;
+mod request;
 mod response;
 mod server;
 mod status_code;
 mod utils;
-mod file_handler;
-mod request;
 // mod error;
 // mod router;
 

@@ -44,7 +44,7 @@ impl ToString for Response {
         )
         .unwrap();
         for header in &self.headers {
-            write!(response, "{}: {}{}", header.name, header.value, CRLF).unwrap();
+            write!(response, "{}: {}{}", header.name(), header.value(), CRLF).unwrap();
         }
 
         write!(response, "{}", CRLF).unwrap();
