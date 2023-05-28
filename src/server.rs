@@ -1,4 +1,4 @@
-use crate::{header::Header, response::Response};
+use crate::{header::Header, response::Response, file_handler::read_file};
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -42,7 +42,8 @@ impl Server {
             }
         }
     }
-
+    
+    // TODO: Add non-blocking I/O operations
     fn handle_connection(&self, mut stream: TcpStream) {
         let mut buffer = [0; 1024];
         stream
@@ -52,9 +53,9 @@ impl Server {
             200,
             vec![Header::new(
                 "Content-Type".to_string(),
-                "text/plain".to_string(),
+                "text/html".to_string(),
             )],
-            "Hello, world!".to_string(),
+            read_file("static/index.html").unwrap(),
         );
         stream
             .write_all(response.to_string().as_bytes())
