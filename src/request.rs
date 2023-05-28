@@ -1,7 +1,9 @@
-use crate::header::Header;
+use std::str::FromStr;
+
+use crate::{header::Header, method::Method};
 
 pub struct Request {
-    method: String,
+    method: Method,
     target: String,
     // Should I use HTTP version equals 1.1 or parse it from request?...
     // protocol: String,
@@ -60,16 +62,15 @@ impl Request {
         }
 
         let body = lines.collect::<Vec<_>>().join("\n");
-        println!("Body: {}", body);
         Self {
-            method,
+            method: Method::from_str(&method).unwrap(),
             target,
             headers,
             body,
         }
     }
 
-    pub fn method(&self) -> &str {
+    pub fn method(&self) -> &Method {
         &self.method
     }
 

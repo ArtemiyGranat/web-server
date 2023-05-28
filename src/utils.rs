@@ -1,3 +1,4 @@
 // pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 pub const CRLF: &str = "\r\n";
+pub const FILES_PREFIX: &str = "static/";
