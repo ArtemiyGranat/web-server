@@ -32,7 +32,7 @@ impl Server {
             address: address.to_string(),
             port,
             router: Router::new(),
-            logger: Logger::new(LogLevel::Debug),
+            logger: Logger::new(LogLevel::Debug).colored(),
         }
     }
 

@@ -17,21 +17,50 @@ impl LogLevel {
             LogLevel::Error => "ERROR",
         }
     }
+
+    pub fn ansi_color(&self) -> u8 {
+        match self {
+            LogLevel::Debug => 34,
+            LogLevel::Info => 32,
+            LogLevel::Warning => 33,
+            LogLevel::Error => 31,
+        }
+    }
+
+    pub fn as_colored_str(&self) -> String {
+        format!("\x1b[{}m{}\x1b[0m", self.ansi_color(), self.as_str())
+    }
 }
 
 pub struct Logger {
     level: LogLevel,
+    colored: bool,
 }
 
 impl Logger {
     pub fn new(level: LogLevel) -> Self {
-        Self { level }
+        Self {
+            level,
+            colored: false,
+        }
+    }
+
+    pub fn colored(self) -> Self {
+        Self {
+            level: self.level,
+            colored: true,
+        }
     }
 
     pub fn log(&self, level: LogLevel, msg: String) {
         if level >= self.level {
             let current_time = Local::now().format("%d-%m-%Y %H:%M:%S");
-            println!("[{}] [{}] {}", current_time, level.as_str(), msg)
+            let level = if self.colored {
+                level.as_colored_str()
+            } else {
+                level.as_str().to_string()
+            };
+            println!("[{}] [{}] {}", current_time, level, msg)
         }
     }
 
