@@ -38,7 +38,7 @@ impl Router {
                     Err(_) => Response::new(500, Vec::new(), String::from("500 Internal Server Error")),
                 }
             }
-            Method::Unknown => {
+            _ => {
                 Response::new(400, Vec::new(), String::from("400 Bad Request"))
             }
         }

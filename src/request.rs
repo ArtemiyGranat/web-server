@@ -14,29 +14,26 @@ pub struct Request {
 impl Request {
     // TODO: Error logging without panicking, HTTP version handling and
     // code refactoring
-    pub fn parse(raw_request: &str) -> Self {
+    pub fn parse(raw_request: &str) -> Result<Self, &str> {
         let mut lines = raw_request.lines();
 
         let mut request_line = lines
             .next()
-            .ok_or("Invalid request")
-            .unwrap()
+            .ok_or("Invalid request")?
             .split_ascii_whitespace();
 
         let method = request_line
             .next()
-            .ok_or("Invalid request method")
-            .unwrap()
+            .ok_or("Invalid request method")?
             .to_string();
+
         let target = request_line
             .next()
-            .ok_or("Invalid request path")
-            .unwrap()
+            .ok_or("Invalid request path")?
             .to_string();
         let http_version = request_line
             .next()
-            .ok_or("Invalid HTTP version")
-            .unwrap()
+            .ok_or("Invalid HTTP version")?
             .to_string();
 
         let mut headers = Vec::new();
@@ -48,26 +45,24 @@ impl Request {
             let mut parts = header_line.split(":");
             let name = parts
                 .next()
-                .ok_or("Invalid header")
-                .unwrap()
+                .ok_or("Invalid header")?
                 .trim()
                 .to_string();
             let value = parts
                 .next()
-                .ok_or("Invalid header")
-                .unwrap()
+                .ok_or("Invalid header")?
                 .trim()
                 .to_string();
             headers.push(Header::new(name, value));
         }
 
         let body = lines.collect::<Vec<_>>().join("\n");
-        Self {
+        Ok(Self {
             method: Method::from_str(&method).unwrap(),
             target,
             headers,
             body,
-        }
+        })
     }
 
     pub fn method(&self) -> &Method {

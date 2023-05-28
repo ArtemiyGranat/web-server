@@ -28,6 +28,10 @@ impl Response {
     pub fn add_header(&mut self, header: Header) {
         self.headers.push(header)
     }
+
+    pub fn status_code(&self) -> &StatusCode {
+        &self.status_code
+    }
 }
 
 impl ToString for Response {
