@@ -1,3 +1,4 @@
+use crate::{request::Request, router::Router};
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -6,6 +7,7 @@ use std::{
 pub struct Server {
     address: String,
     port: u16,
+    router: Router,
 }
 
 impl Default for Server {
@@ -13,6 +15,7 @@ impl Default for Server {
         Self {
             address: "localhost".to_string(),
             port: 8080,
+            router: Router::new(),
         }
     }
 }
@@ -22,6 +25,7 @@ impl Server {
         Self {
             address: address.to_string(),
             port,
+            router: Router::new(),
         }
     }
 
@@ -42,15 +46,16 @@ impl Server {
         }
     }
 
+    // TODO: Add non-blocking I/O operations
     fn handle_connection(&self, mut stream: TcpStream) {
         let mut buffer = [0; 1024];
         stream
             .read(&mut buffer)
             .expect("Could not read from stream");
-
-        let response = b"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, World!";
+        let request = Request::parse(&String::from_utf8(buffer.to_vec()).unwrap());
+        let response = self.router.handle_request(&request);
         stream
-            .write_all(response)
+            .write_all(response.to_string().as_bytes())
             .expect("Could not write to stream");
 
         stream.flush().expect("Could not flush stream");
