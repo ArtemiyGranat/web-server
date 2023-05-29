@@ -1,6 +1,5 @@
-use chrono::Local;
-
 use crate::{request::Request, response::Response};
+use chrono::Local;
 
 #[derive(PartialEq, PartialOrd)]
 pub enum LogLevel {
