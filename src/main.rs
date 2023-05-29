@@ -3,6 +3,7 @@ use server::Server;
 
 mod file_handler;
 mod header;
+#[cfg(feature = "logger")]
 mod logger;
 mod method;
 mod request;
