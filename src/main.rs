@@ -1,18 +1,5 @@
 use clap::Parser;
-use server::Server;
-
-mod file_handler;
-mod header;
-#[cfg(feature = "logger")]
-mod logger;
-mod method;
-mod request;
-mod response;
-mod router;
-mod server;
-mod status_code;
-mod utils;
-// mod error;
+use web_server::Server;
 
 #[derive(Parser, Debug)]
 struct Args {

@@ -8,12 +8,35 @@ use std::{
     net::{TcpListener, TcpStream},
 };
 
+mod file_handler;
+pub mod header;
+#[cfg(feature = "logger")]
+mod logger;
+mod method;
+pub mod request;
+pub mod response;
+pub mod router;
+mod status_code;
+mod utils;
+
 pub struct Server {
     router: Router,
     #[cfg(feature = "logger")]
     logger: Logger,
     #[cfg(not(feature = "logger"))]
     logger: DefaultLogger,
+}
+
+impl Default for Server {
+    fn default() -> Self {
+        Self {
+            router: Router::new(),
+            #[cfg(feature = "logger")]
+            logger: Logger::new(LogLevel::Debug).colored(),
+            #[cfg(not(feature = "logger"))]
+            logger: DefaultLogger::new(),
+        }
+    }
 }
 
 impl Server {
