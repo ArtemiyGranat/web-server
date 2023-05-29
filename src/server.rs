@@ -1,8 +1,8 @@
-use crate::{
-    logger::{LogLevel, Logger},
-    request::Request,
-    router::Router,
-};
+#[cfg(feature = "logger")]
+use crate::logger::{LogLevel, Logger};
+#[cfg(not(feature = "logger"))]
+use crate::utils::DefaultLogger;
+use crate::{request::Request, router::Router};
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -10,28 +10,36 @@ use std::{
 
 pub struct Server {
     router: Router,
+    #[cfg(feature = "logger")]
     logger: Logger,
+    #[cfg(not(feature = "logger"))]
+    logger: DefaultLogger,
 }
 
 impl Server {
     pub fn new() -> Self {
         Self {
             router: Router::new(),
+            #[cfg(feature = "logger")]
             logger: Logger::new(LogLevel::Debug).colored(),
+            #[cfg(not(feature = "logger"))]
+            logger: DefaultLogger::new(),
         }
     }
 
     pub fn run(&self, address: &str, port: u16) {
         match TcpListener::bind((address, port)) {
             Ok(listener) => {
+                #[cfg(feature = "logger")]
                 self.logger
                     .info(format!("Server is listening at port {}", port));
                 for stream in listener.incoming() {
                     match stream {
                         Ok(stream) => self.handle_connection(stream),
-                        Err(e) => self
-                            .logger
-                            .error(format!("Could not accept connection: {}", e)),
+                        Err(e) => {
+                            self.logger
+                                .error(format!("Could not accept connection: {}", e));
+                        }
                     }
                 }
             }
@@ -66,7 +74,7 @@ impl Server {
             return;
         }
         let request = request.unwrap();
-
+        #[cfg(feature = "logger")]
         self.logger.request_received(&addr, &request);
         let response = self.router.handle_request(&request);
         if let Err(e) = stream.write_all(response.to_string().as_bytes()) {
@@ -74,7 +82,7 @@ impl Server {
                 .error(format!("Could not write to stream: {}", e));
             return;
         }
-
+        #[cfg(feature = "logger")]
         self.logger.request_completed(&addr, &response);
         if let Err(e) = stream.flush() {
             self.logger.error(format!("Could not flush stream: {}", e));
