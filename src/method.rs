@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 // TODO: Add other methods
-#[derive(PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub enum Method {
     Get,
     Unknown,

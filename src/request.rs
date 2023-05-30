@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use crate::{header::Header, method::Method};
 
+#[derive(Clone)]
 pub struct Request {
     method: Method,
     target: String,
