@@ -9,7 +9,6 @@ impl StatusCode {
         self.0
     }
 
-    // TODO: Add all status code descriptions
     pub fn description(&self) -> &'static str {
         match self.0 {
             100 => "Continue",

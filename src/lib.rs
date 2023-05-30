@@ -1,3 +1,4 @@
+use method::Method;
 use response::Response;
 
 #[cfg(feature = "logger")]
@@ -73,7 +74,14 @@ impl Server {
             }
         }
     }
-    
+
+    pub fn serve<M>(&mut self, method: M, path: &str, handler: fn(Request) -> Response)
+    where
+        M: Into<Method>,
+    {
+        self.router.get(path, handler);
+    }
+
     pub fn get(mut self, path: &str, handler: fn(Request) -> Response) -> Self {
         self.router.get(path, handler);
         self

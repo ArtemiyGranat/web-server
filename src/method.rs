@@ -7,14 +7,12 @@ pub enum Method {
     Unknown,
 }
 
-impl FromStr for Method {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Method, Self::Err> {
-        Ok(match s {
+impl From<&str> for Method {
+    fn from(s: &str) -> Method {
+        match s {
             "GET" => Method::Get,
             _ => Method::Unknown,
-        })
+        }
     }
 }
 

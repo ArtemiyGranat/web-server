@@ -18,6 +18,7 @@ fn hello_handler(request: Request) -> Response {
 
 fn main() {
     let args = Args::parse();
-    let server = Server::new().get("/", hello_handler);
+    let mut server = Server::new();
+    server.serve("GET", "/", hello_handler);
     server.run(&args.address, args.port);
 }
