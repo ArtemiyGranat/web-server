@@ -1,13 +1,10 @@
 [package]
-name = "web-server"
+name = "static_site"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-chrono = { version = "0.4.24", optional = true }
-
-[features]
-default = []
-logger = ["chrono"]
+clap = { version = "4.2.7", features = ["derive"] }
+web-server = { path = "../..", features = ["logger"] }
