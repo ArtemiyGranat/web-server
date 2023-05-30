@@ -7,8 +7,21 @@ use crate::{
     response::Response,
 };
 
+#[derive(PartialEq, Eq, Hash)]
+pub struct RouteKey {
+    method: Method,
+    target: String,
+}
+
+impl RouteKey {
+    pub fn new(method: Method, target: String) -> Self {
+        Self { method, target }
+    }
+}
+
+#[derive(Default)]
 pub struct Router {
-    routes: HashMap<String, String>,
+    routes: HashMap<RouteKey, fn(Request) -> Response>,
 }
 
 impl Router {
@@ -19,12 +32,16 @@ impl Router {
     }
 
     // TODO: Implement this
-    pub fn add_route(&mut self, target: &str, handler: String) {
-        todo!()
+    fn add_route(&mut self, route_key: RouteKey, handler: fn(Request) -> Response) {
+        self.routes.insert(route_key, handler);
+    }
+
+    pub fn get(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Get, target.to_string()), handler)
     }
 
     // TODO: Improve this method
-    // Need to implement Post, Put, Delete etc handling and redirect from 
+    // Need to implement Post, Put, Delete etc handling and redirect from
     // "/" to "/index.html" maybe so it won't be 500 status code
     pub fn handle_request(&self, request: &Request) -> Response {
         match request.method() {
