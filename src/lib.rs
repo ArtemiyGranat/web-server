@@ -11,7 +11,7 @@ use std::{
     net::{TcpListener, TcpStream},
 };
 
-// mod file_handler;
+pub mod file;
 pub mod header;
 #[cfg(feature = "logger")]
 pub mod logger;

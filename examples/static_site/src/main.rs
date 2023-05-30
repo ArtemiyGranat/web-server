@@ -1,5 +1,5 @@
 use clap::Parser;
-use web_server::{request::Request, response::Response, Server};
+use web_server::{file::File, request::Request, response::Response, Server};
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -12,8 +12,8 @@ struct Args {
     port: u16,
 }
 
-fn hello_handler(request: Request) -> Response {
-    Response::new(200, Vec::new(), "Hello world".to_string())
+fn hello_handler(_request: Request) -> Response {
+    Response::new(200, Vec::new(), File::new("static/index.html"))
 }
 
 fn setup_router(server: &mut Server) {
