@@ -1,14 +1,26 @@
 use std::collections::HashMap;
 
 use crate::{
-    file_handler::{file_exists, read_file},
     method::Method,
     request::Request,
     response::Response,
 };
 
+#[derive(PartialEq, Eq, Hash)]
+pub struct RouteKey {
+    method: Method,
+    target: String,
+}
+
+impl RouteKey {
+    pub fn new(method: Method, target: String) -> Self {
+        Self { method, target }
+    }
+}
+
+#[derive(Default)]
 pub struct Router {
-    routes: HashMap<String, String>,
+    routes: HashMap<RouteKey, fn(Request) -> Response>,
 }
 
 impl Router {
@@ -18,31 +30,57 @@ impl Router {
         }
     }
 
-    // TODO: Implement this
-    pub fn add_route(&mut self, target: &str, handler: String) {
-        todo!()
+    fn add_route(&mut self, route_key: RouteKey, handler: fn(Request) -> Response) {
+        self.routes.insert(route_key, handler);
     }
 
-    // TODO: Improve this method
-    // Need to implement Post, Put, Delete etc handling and redirect from 
-    // "/" to "/index.html" maybe so it won't be 500 status code
+    pub fn get(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Get, target.to_string()), handler)
+    }
+
+    pub fn head(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Head, target.to_string()), handler)
+    }
+
+    pub fn post(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Post, target.to_string()), handler)
+    }
+
+    pub fn put(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Put, target.to_string()), handler)
+    }
+
+    pub fn delete(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Delete, target.to_string()), handler)
+    }
+
+    pub fn connect(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Connect, target.to_string()), handler)
+    }
+
+    pub fn options(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Options, target.to_string()), handler)
+    }
+
+    pub fn trace(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Trace, target.to_string()), handler)
+    }
+
+    pub fn patch(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Patch, target.to_string()), handler)
+    }
+
+    // TODO: Add method not allowed or bad request or smth
     pub fn handle_request(&self, request: &Request) -> Response {
         match request.method() {
             Method::Get => {
-                let (status_code, target) = if file_exists(request.target()) {
-                    (200, request.target())
-                } else {
-                    (404, "404.html")
-                };
-
-                match read_file(target) {
-                    Ok(content) => Response::new(status_code, Vec::new(), content),
-                    Err(_) => {
-                        Response::new(500, Vec::new(), String::from("500 Internal Server Error"))
-                    }
+                let route_key = RouteKey::new(Method::Get, request.target().to_string());
+                match self.routes.get(&route_key) {
+                    Some(handler) => handler(request.clone()),
+                    None => Response::new(404, Vec::new(), String::new()),
                 }
             }
-            _ => Response::new(400, Vec::new(), String::from("400 Bad Request")),
+            _ => Response::new(400, Vec::new(), String::new()),
         }
     }
 }

@@ -1,7 +1,6 @@
-use std::str::FromStr;
-
 use crate::{header::Header, method::Method};
 
+#[derive(Clone)]
 pub struct Request {
     method: Method,
     target: String,
@@ -42,22 +41,14 @@ impl Request {
             }
 
             let mut parts = header_line.split(':');
-            let name = parts
-                .next()
-                .ok_or("Invalid header")?
-                .trim()
-                .to_string();
-            let value = parts
-                .next()
-                .ok_or("Invalid header")?
-                .trim()
-                .to_string();
+            let name = parts.next().ok_or("Invalid header")?.trim().to_string();
+            let value = parts.next().ok_or("Invalid header")?.trim().to_string();
             headers.push(Header::new(name, value));
         }
 
         let body = lines.collect::<Vec<_>>().join("\n");
         Ok(Self {
-            method: Method::from_str(&method).unwrap(),
+            method: Method::from(method.as_ref()),
             target,
             headers,
             body,

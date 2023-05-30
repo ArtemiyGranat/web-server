@@ -1,5 +1,4 @@
 pub const CRLF: &str = "\r\n";
-pub const FILES_PREFIX: &str = "static/";
 
 #[cfg(not(feature = "logger"))]
 pub struct DefaultLogger;

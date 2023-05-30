@@ -10,11 +10,14 @@ pub struct Response {
 }
 
 impl Response {
-    pub fn new(status_code: u16, headers: Vec<Header>, body: String) -> Self {
+    pub fn new<B>(status_code: u16, headers: Vec<Header>, body: B) -> Self
+    where
+        B: Into<String>,
+    {
         let mut response = Self {
             status_code: StatusCode::new(status_code),
             headers: Vec::new(),
-            body,
+            body: body.into(),
         };
 
         for header in headers {
