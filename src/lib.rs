@@ -1,3 +1,5 @@
+use response::Response;
+
 #[cfg(feature = "logger")]
 use crate::logger::{LogLevel, Logger};
 #[cfg(not(feature = "logger"))]
@@ -8,10 +10,10 @@ use std::{
     net::{TcpListener, TcpStream},
 };
 
-mod file_handler;
+// mod file_handler;
 pub mod header;
 #[cfg(feature = "logger")]
-mod logger;
+pub mod logger;
 mod method;
 pub mod request;
 pub mod response;
@@ -70,6 +72,11 @@ impl Server {
                 self.logger.error(format!("Could not bind a socket: {}", e));
             }
         }
+    }
+    
+    pub fn get(mut self, path: &str, handler: fn(Request) -> Response) -> Self {
+        self.router.get(path, handler);
+        self
     }
 
     // TODO: Add non-blocking I/O operations

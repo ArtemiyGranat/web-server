@@ -1,5 +1,5 @@
 use clap::Parser;
-use web_server::Server;
+use web_server::{request::Request, response::Response, Server};
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -12,8 +12,12 @@ struct Args {
     port: u16,
 }
 
+fn hello_handler(request: Request) -> Response {
+    Response::new(200, Vec::new(), "Hello world".to_string())
+}
+
 fn main() {
     let args = Args::parse();
-    let server = Server::new();
+    let server = Server::new().get("/", hello_handler);
     server.run(&args.address, args.port);
 }
