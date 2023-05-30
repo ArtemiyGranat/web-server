@@ -38,6 +38,39 @@ impl Router {
         self.add_route(RouteKey::new(Method::Get, target.to_string()), handler)
     }
 
+    pub fn head(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Head, target.to_string()), handler)
+    }
+
+    pub fn post(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Post, target.to_string()), handler)
+    }
+
+    pub fn put(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Put, target.to_string()), handler)
+    }
+
+    pub fn delete(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Delete, target.to_string()), handler)
+    }
+
+    pub fn connect(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Connect, target.to_string()), handler)
+    }
+
+    pub fn options(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Options, target.to_string()), handler)
+    }
+
+    pub fn trace(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Trace, target.to_string()), handler)
+    }
+
+    pub fn patch(&mut self, target: &str, handler: fn(Request) -> Response) {
+        self.add_route(RouteKey::new(Method::Patch, target.to_string()), handler)
+    }
+
+    // TODO: Add method not allowed or bad request or smth
     pub fn handle_request(&self, request: &Request) -> Response {
         match request.method() {
             Method::Get => {

@@ -79,7 +79,20 @@ impl Server {
     where
         M: Into<Method>,
     {
-        self.router.get(path, handler);
+        let method = method.into();
+        match method {
+            Method::Get => self.router.get(path, handler),
+            Method::Head => self.router.head(path, handler),
+            Method::Post => self.router.post(path, handler),
+            Method::Put => self.router.put(path, handler),
+            Method::Delete => self.router.delete(path, handler),
+            Method::Connect => self.router.connect(path, handler),
+            Method::Options => self.router.options(path, handler),
+            Method::Trace => self.router.trace(path, handler),
+            Method::Patch => self.router.patch(path, handler),
+            // TODO: Change unreachable!() to Method Not Allowed response
+            _ => unreachable!(),
+        }
     }
 
     pub fn get(mut self, path: &str, handler: fn(Request) -> Response) -> Self {

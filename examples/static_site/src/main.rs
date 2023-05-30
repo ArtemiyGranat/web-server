@@ -16,9 +16,13 @@ fn hello_handler(request: Request) -> Response {
     Response::new(200, Vec::new(), "Hello world".to_string())
 }
 
+fn setup_router(server: &mut Server) {
+    server.serve("GET", "/", hello_handler);
+}
+
 fn main() {
     let args = Args::parse();
     let mut server = Server::new();
-    server.serve("GET", "/", hello_handler);
+    setup_router(&mut server);
     server.run(&args.address, args.port);
 }
