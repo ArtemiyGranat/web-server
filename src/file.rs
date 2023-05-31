@@ -27,7 +27,7 @@ impl File {
 }
 
 impl From<File> for String {
-    fn from(val: File) -> Self {
-        val.data
+    fn from(file: File) -> Self {
+        file.data
     }
 }

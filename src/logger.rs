@@ -1,4 +1,4 @@
-use crate::{request::Request, response::Response};
+use crate::{request::HttpRequest, response::HttpResponse};
 use chrono::Local;
 
 #[derive(PartialEq, PartialOrd)]
@@ -80,7 +80,7 @@ impl Logger {
         self.log(LogLevel::Error, &msg);
     }
 
-    pub fn request_received(&self, addr: &str, request: &Request) {
+    pub fn request_received(&self, addr: &str, request: &HttpRequest) {
         let msg = format!(
             "[{}] Incoming request: {} {}",
             addr,
@@ -90,7 +90,7 @@ impl Logger {
         self.info(&msg);
     }
 
-    pub fn request_completed(&self, addr: &str, response: &Response) {
+    pub fn request_completed(&self, addr: &str, response: &HttpResponse) {
         let msg = format!(
             "[{}] Request completed with {} {}",
             addr,

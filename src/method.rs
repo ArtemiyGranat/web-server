@@ -1,7 +1,5 @@
-// use std::str::FromStr;
-
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub enum Method {
+pub enum HttpMethod {
     Get,
     Head,
     Post,
@@ -14,55 +12,36 @@ pub enum Method {
     Unknown,
 }
 
-// impl FromStr for Method {
-//     type Err = ();
-
-//     fn from_str(s: &str) -> Result<Self, Self::Err> {
-//         Ok(match s {
-//             "GET" => Method::Get,
-//             "HEAD" => Method::Head,
-//             "POST" => Method::Post,
-//             "PUT" => Method::Put,
-//             "DELETE" => Method::Delete,
-//             "CONNECT" => Method::Connect,
-//             "OPTIONS" => Method::Options,
-//             "TRACE" => Method::Trace,
-//             "PATCH" => Method::Patch,
-//             _ => Method::Unknown,
-//         })
-//     }
-// }
-
-impl From<&str> for Method {
-    fn from(s: &str) -> Method {
+impl From<&str> for HttpMethod {
+    fn from(s: &str) -> HttpMethod {
         match s {
-            "GET" => Method::Get,
-            "HEAD" => Method::Head,
-            "POST" => Method::Post,
-            "PUT" => Method::Put,
-            "DELETE" => Method::Delete,
-            "CONNECT" => Method::Connect,
-            "OPTIONS" => Method::Options,
-            "TRACE" => Method::Trace,
-            "PATCH" => Method::Patch,
-            _ => Method::Unknown,
+            "GET" => HttpMethod::Get,
+            "HEAD" => HttpMethod::Head,
+            "POST" => HttpMethod::Post,
+            "PUT" => HttpMethod::Put,
+            "DELETE" => HttpMethod::Delete,
+            "CONNECT" => HttpMethod::Connect,
+            "OPTIONS" => HttpMethod::Options,
+            "TRACE" => HttpMethod::Trace,
+            "PATCH" => HttpMethod::Patch,
+            _ => HttpMethod::Unknown,
         }
     }
 }
 
-impl Method {
+impl HttpMethod {
     pub fn as_str(&self) -> &str {
-        match *self {
-            Method::Get => "GET",
-            Method::Head => "HEAD",
-            Method::Post => "POST",
-            Method::Put => "PUT",
-            Method::Delete => "DELETE",
-            Method::Connect => "CONNECT",
-            Method::Options => "OPTIONS",
-            Method::Trace => "TRACE",
-            Method::Patch => "PATCH",
-            _ => unreachable!(),
+        match self {
+            HttpMethod::Get => "GET",
+            HttpMethod::Head => "HEAD",
+            HttpMethod::Post => "POST",
+            HttpMethod::Put => "PUT",
+            HttpMethod::Delete => "DELETE",
+            HttpMethod::Connect => "CONNECT",
+            HttpMethod::Options => "OPTIONS",
+            HttpMethod::Trace => "TRACE",
+            HttpMethod::Patch => "PATCH",
+            HttpMethod::Unknown => unreachable!(),
         }
     }
 }

@@ -3,7 +3,7 @@ use crate::logger::{LogLevel, Logger};
 #[cfg(not(feature = "logger"))]
 use crate::utils::DefaultLogger;
 
-use crate::{method::Method, request::Request, response::Response, router::Router};
+use crate::{method::HttpMethod, request::HttpRequest, response::HttpResponse, router::Router};
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -13,11 +13,11 @@ pub mod file;
 pub mod header;
 #[cfg(feature = "logger")]
 pub mod logger;
-mod method;
+pub mod method;
 pub mod request;
 pub mod response;
 pub mod router;
-mod status_code;
+pub mod status_code;
 mod utils;
 
 pub struct Server {
@@ -74,12 +74,12 @@ impl Server {
         }
     }
 
-    pub fn serve<M>(&mut self, method: M, target: &str, handler: fn(Request) -> Response)
+    pub fn serve<M>(&mut self, method: M, target: &str, handler: fn(HttpRequest) -> HttpResponse)
     where
-        M: Into<Method>,
+        M: Into<HttpMethod>,
     {
         match method.into() {
-            Method::Unknown => self.logger.error("Invalid HTTP method"),
+            HttpMethod::Unknown => self.logger.error("Invalid HTTP method"),
             method => self.router.add_route(method, target, handler),
         }
     }
@@ -104,7 +104,7 @@ impl Server {
             }
         };
 
-        match Request::new(&raw_request) {
+        match HttpRequest::new(&raw_request) {
             Ok(request) => {
                 #[cfg(feature = "logger")]
                 self.logger.request_received(&addr, &request);
@@ -125,7 +125,7 @@ impl Server {
         Ok(raw_request)
     }
 
-    fn send_response(&self, _addr: &str, stream: &mut TcpStream, response: &Response) {
+    fn send_response(&self, _addr: &str, stream: &mut TcpStream, response: &HttpResponse) {
         if let Err(e) = stream.write_all(response.to_string().as_bytes()) {
             self.logger
                 .error(&format!("Could not write to stream: {}", e));

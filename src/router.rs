@@ -1,22 +1,23 @@
+use crate::{method::HttpMethod, request::HttpRequest, response::HttpResponse, status_code::HttpStatusCode};
 use std::collections::HashMap;
 
-use crate::{method::Method, request::Request, response::Response};
-
 #[derive(PartialEq, Eq, Hash)]
-pub struct RouteKey {
-    method: Method,
+struct RouteKey {
+    method: HttpMethod,
     target: String,
 }
 
 impl RouteKey {
-    pub fn new(method: Method, target: String) -> Self {
+    fn new(method: HttpMethod, target: String) -> Self {
         Self { method, target }
     }
 }
 
+type RouteMap = HashMap<RouteKey, fn(HttpRequest) -> HttpResponse>;
+
 #[derive(Default)]
 pub struct Router {
-    routes: HashMap<RouteKey, fn(Request) -> Response>,
+    routes: RouteMap,
 }
 
 impl Router {
@@ -26,29 +27,34 @@ impl Router {
         }
     }
 
-    pub fn add_route(&mut self, method: Method, target: &str, handler: fn(Request) -> Response) {
+    pub fn add_route(
+        &mut self,
+        method: HttpMethod,
+        target: &str,
+        handler: fn(HttpRequest) -> HttpResponse,
+    ) {
         let route_key = RouteKey::new(method, target.to_string());
         self.routes.insert(route_key, handler);
     }
 
     // TODO: Add method not allowed or bad request or smth
-    pub fn handle_request(&self, request: &Request) -> Response {
+    pub fn handle_request(&self, request: &HttpRequest) -> HttpResponse {
         match request.method() {
-            Method::Get => {
-                let route_key = RouteKey::new(Method::Get, request.target().to_string());
+            HttpMethod::Get => {
+                let route_key = RouteKey::new(HttpMethod::Get, request.target().to_string());
                 match self.routes.get(&route_key) {
                     Some(handler) => handler(request.clone()),
-                    None => Response::new(
+                    None => HttpResponse::new(
                         // request.http_version().to_string(),
-                        404,
+                        HttpStatusCode::NOT_FOUND,
                         Vec::new(),
                         String::new(),
                     ),
                 }
             }
-            _ => Response::new(
+            _ => HttpResponse::new(
                 // request.http_version().to_string(),
-                400,
+                HttpStatusCode::BAD_REQUEST,
                 Vec::new(),
                 String::new(),
             ),
