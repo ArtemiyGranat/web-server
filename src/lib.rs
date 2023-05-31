@@ -1,11 +1,9 @@
-use method::Method;
-use response::Response;
-
 #[cfg(feature = "logger")]
 use crate::logger::{LogLevel, Logger};
 #[cfg(not(feature = "logger"))]
-use crate::utils::DefaultLogger;
-use crate::{request::Request, router::Router};
+use crate::{
+    method::Method, request::Request, response::Response, router::Router, utils::DefaultLogger,
+};
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -59,6 +57,7 @@ impl Server {
                 #[cfg(feature = "logger")]
                 self.logger
                     .info(format!("Server is listening at port {}", port));
+
                 for stream in listener.incoming() {
                     match stream {
                         Ok(stream) => self.handle_connection(stream),
@@ -79,10 +78,9 @@ impl Server {
     where
         M: Into<Method>,
     {
-        let method = method.into();
-        match method {
+        match method.into() {
             Method::Unknown => self.logger.error("Invalid HTTP method".to_string()),
-            _ => self.router.add_route(method, target, handler),
+            method => self.router.add_route(method, target, handler),
         }
     }
 
@@ -97,30 +95,44 @@ impl Server {
             }
         };
 
+        let raw_request = match self.read_request(&mut stream) {
+            Ok(raw_request) => raw_request,
+            Err(e) => {
+                self.logger
+                    .error(format!("Could not read request from {}: {}", addr, e));
+                return;
+            }
+        };
+        
+        match Request::new(&raw_request) {
+            Ok(request) => {
+                #[cfg(feature = "logger")]
+                self.logger.request_received(&addr, &request);
+
+                let response = self.router.handle_request(&request);
+                self.send_response(&addr, &mut stream, &response);
+            }
+            Err(e) => self
+                .logger
+                .error(format!("Could not parse a request from {}: {}", addr, e)),
+        }
+    }
+
+    fn read_request(&self, stream: &mut TcpStream) -> Result<String, std::io::Error> {
         let mut buffer = [0; 1024];
-        if let Err(e) = stream.read(&mut buffer) {
-            self.logger
-                .error(format!("Could not read from stream: {}", e));
-            return;
-        }
-        let raw_request = String::from_utf8_lossy(&buffer);
-        let request = Request::new(&raw_request);
-        if let Err(e) = request {
-            self.logger
-                .error(format!("Could not parse a request from {}: {}", addr, e));
-            return;
-        }
-        let request = request.unwrap();
-        #[cfg(feature = "logger")]
-        self.logger.request_received(&addr, &request);
-        let response = self.router.handle_request(&request);
+        let bytes_read = stream.read(&mut buffer)?;
+        let raw_request = String::from_utf8_lossy(&buffer[..bytes_read]).to_string();
+        Ok(raw_request)
+    }
+
+    fn send_response(&self, _addr: &str, stream: &mut TcpStream, response: &Response) {
         if let Err(e) = stream.write_all(response.to_string().as_bytes()) {
             self.logger
                 .error(format!("Could not write to stream: {}", e));
             return;
         }
         #[cfg(feature = "logger")]
-        self.logger.request_completed(&addr, &response);
+        self.logger.request_completed(&_addr, &response);
         if let Err(e) = stream.flush() {
             self.logger.error(format!("Could not flush stream: {}", e));
         }
