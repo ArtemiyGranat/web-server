@@ -1,9 +1,9 @@
 #[cfg(feature = "logger")]
 use crate::logger::{LogLevel, Logger};
 #[cfg(not(feature = "logger"))]
-use crate::{
-    method::Method, request::Request, response::Response, router::Router, utils::DefaultLogger,
-};
+use crate::utils::DefaultLogger;
+
+use crate::{method::Method, request::Request, response::Response, router::Router};
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -56,20 +56,20 @@ impl Server {
             Ok(listener) => {
                 #[cfg(feature = "logger")]
                 self.logger
-                    .info(format!("Server is listening at port {}", port));
+                    .info(&format!("Server is listening at port {}", port));
 
                 for stream in listener.incoming() {
                     match stream {
                         Ok(stream) => self.handle_connection(stream),
                         Err(e) => {
                             self.logger
-                                .error(format!("Could not accept connection: {}", e));
+                                .error(&format!("Could not accept connection: {}", e));
                         }
                     }
                 }
             }
             Err(e) => {
-                self.logger.error(format!("Could not bind a socket: {}", e));
+                self.logger.error(&format!("Could not bind a socket: {}", e));
             }
         }
     }
@@ -79,7 +79,7 @@ impl Server {
         M: Into<Method>,
     {
         match method.into() {
-            Method::Unknown => self.logger.error("Invalid HTTP method".to_string()),
+            Method::Unknown => self.logger.error("Invalid HTTP method"),
             method => self.router.add_route(method, target, handler),
         }
     }
@@ -90,7 +90,7 @@ impl Server {
             Ok(addr) => addr.ip().to_string(),
             Err(e) => {
                 self.logger
-                    .error(format! {"Failed to detect IP address: {}", e});
+                    .error(&format! {"Failed to detect IP address: {}", e});
                 return;
             }
         };
@@ -99,11 +99,11 @@ impl Server {
             Ok(raw_request) => raw_request,
             Err(e) => {
                 self.logger
-                    .error(format!("Could not read request from {}: {}", addr, e));
+                    .error(&format!("Could not read request from {}: {}", addr, e));
                 return;
             }
         };
-        
+
         match Request::new(&raw_request) {
             Ok(request) => {
                 #[cfg(feature = "logger")]
@@ -114,7 +114,7 @@ impl Server {
             }
             Err(e) => self
                 .logger
-                .error(format!("Could not parse a request from {}: {}", addr, e)),
+                .error(&format!("Could not parse a request from {}: {}", addr, e)),
         }
     }
 
@@ -128,13 +128,13 @@ impl Server {
     fn send_response(&self, _addr: &str, stream: &mut TcpStream, response: &Response) {
         if let Err(e) = stream.write_all(response.to_string().as_bytes()) {
             self.logger
-                .error(format!("Could not write to stream: {}", e));
+                .error(&format!("Could not write to stream: {}", e));
             return;
         }
         #[cfg(feature = "logger")]
         self.logger.request_completed(&_addr, &response);
         if let Err(e) = stream.flush() {
-            self.logger.error(format!("Could not flush stream: {}", e));
+            self.logger.error(&format!("Could not flush stream: {}", e));
         }
     }
 }

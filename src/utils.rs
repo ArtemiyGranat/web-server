@@ -9,7 +9,7 @@ impl DefaultLogger {
         Self {}
     }
 
-    pub fn error(&self, msg: String) {
+    pub fn error(&self, msg: &str) {
         eprintln!("{}", msg);
     }
 }
