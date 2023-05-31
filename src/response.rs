@@ -4,6 +4,7 @@ use crate::utils::CRLF;
 use std::fmt::Write;
 
 pub struct Response {
+    // http_version: String,
     status_code: StatusCode,
     headers: Vec<Header>,
     body: String,
@@ -15,6 +16,7 @@ impl Response {
         B: Into<String>,
     {
         let mut response = Self {
+            // http_version,
             status_code: StatusCode::new(status_code),
             headers: Vec::new(),
             body: body.into(),
@@ -44,6 +46,7 @@ impl ToString for Response {
         write!(
             response,
             "HTTP/1.1 {} {}{}",
+            // self.http_version,
             self.status_code.code(),
             self.status_code.description(),
             CRLF

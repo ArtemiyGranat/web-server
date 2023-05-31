@@ -4,8 +4,7 @@ use crate::{header::Header, method::Method};
 pub struct Request {
     method: Method,
     target: String,
-    // Should I always use HTTP version equals 1.1 or parse it from request?...
-    // protocol: String,
+    // http_version: String,
     headers: Vec<Header>,
     body: String,
 }
@@ -15,24 +14,8 @@ impl Request {
     pub fn new(raw_request: &str) -> Result<Self, &str> {
         let mut lines = raw_request.lines();
 
-        let mut request_line = lines
-            .next()
-            .ok_or("Invalid request")?
-            .split_ascii_whitespace();
-
-        let method = request_line
-            .next()
-            .ok_or("Invalid request method")?
-            .to_string();
-
-        let target = request_line
-            .next()
-            .ok_or("Invalid request path")?
-            .to_string();
-        let http_version = request_line
-            .next()
-            .ok_or("Invalid HTTP version")?
-            .to_string();
+        let request_line = lines.next().ok_or("Invalid request")?;
+        let (method, target, _http_version) = Self::parse_request_line(request_line)?;
 
         let mut headers = Vec::new();
         for header_line in lines.by_ref() {
@@ -48,11 +31,21 @@ impl Request {
 
         let body = lines.collect::<Vec<_>>().join("\n");
         Ok(Self {
-            method: Method::from(method.as_ref()),
+            method,
             target,
+            // http_version,
             headers,
             body,
         })
+    }
+
+    fn parse_request_line(line: &str) -> Result<(Method, String, String), &str> {
+        let mut parts = line.split(' ');
+        let method = parts.next().ok_or("Invalid request method")?;
+        let target = parts.next().ok_or("Invalid request path")?.to_string();
+        let http_version = parts.next().ok_or("Invalid HTTP version")?.to_string();
+
+        Ok((Method::from(method), target, http_version))
     }
 
     pub fn method(&self) -> &Method {
@@ -62,6 +55,10 @@ impl Request {
     pub fn target(&self) -> &str {
         &self.target
     }
+
+    // pub fn http_version(&self) -> &str {
+    //     &self.http_version
+    // }
 
     pub fn headers(&self) -> &Vec<Header> {
         &self.headers

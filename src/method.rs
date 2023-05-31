@@ -1,3 +1,5 @@
+// use std::str::FromStr;
+
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum Method {
     Get,
@@ -11,6 +13,25 @@ pub enum Method {
     Patch,
     Unknown,
 }
+
+// impl FromStr for Method {
+//     type Err = ();
+
+//     fn from_str(s: &str) -> Result<Self, Self::Err> {
+//         Ok(match s {
+//             "GET" => Method::Get,
+//             "HEAD" => Method::Head,
+//             "POST" => Method::Post,
+//             "PUT" => Method::Put,
+//             "DELETE" => Method::Delete,
+//             "CONNECT" => Method::Connect,
+//             "OPTIONS" => Method::Options,
+//             "TRACE" => Method::Trace,
+//             "PATCH" => Method::Patch,
+//             _ => Method::Unknown,
+//         })
+//     }
+// }
 
 impl From<&str> for Method {
     fn from(s: &str) -> Method {

@@ -38,10 +38,20 @@ impl Router {
                 let route_key = RouteKey::new(Method::Get, request.target().to_string());
                 match self.routes.get(&route_key) {
                     Some(handler) => handler(request.clone()),
-                    None => Response::new(404, Vec::new(), String::new()),
+                    None => Response::new(
+                        // request.http_version().to_string(),
+                        404,
+                        Vec::new(),
+                        String::new(),
+                    ),
                 }
             }
-            _ => Response::new(400, Vec::new(), String::new()),
+            _ => Response::new(
+                // request.http_version().to_string(),
+                400,
+                Vec::new(),
+                String::new(),
+            ),
         }
     }
 }
