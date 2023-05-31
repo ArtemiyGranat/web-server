@@ -1,10 +1,10 @@
-use crate::{header::HttpHeader, method::HttpMethod};
+use crate::{header::HttpHeader, http_version::HttpVersion, method::HttpMethod};
 
 #[derive(Clone)]
 pub struct HttpRequest {
     method: HttpMethod,
     target: String,
-    // http_version: String,
+    http_version: HttpVersion,
     headers: Vec<HttpHeader>,
     body: String,
 }
@@ -15,7 +15,7 @@ impl HttpRequest {
         let mut lines = raw_request.lines();
 
         let request_line = lines.next().ok_or("Invalid request")?;
-        let (method, target, _http_version) = Self::parse_request_line(request_line)?;
+        let (method, target, http_version) = Self::parse_request_line(request_line)?;
 
         let mut headers = Vec::new();
         for header_line in lines.by_ref() {
@@ -33,17 +33,23 @@ impl HttpRequest {
         Ok(Self {
             method,
             target,
-            // http_version,
+            http_version,
             headers,
             body,
         })
     }
 
-    fn parse_request_line(line: &str) -> Result<(HttpMethod, String, String), &str> {
+    fn parse_request_line(line: &str) -> Result<(HttpMethod, String, HttpVersion), &str> {
         let mut parts = line.split(' ');
         let method = parts.next().ok_or("Invalid request method")?;
         let target = parts.next().ok_or("Invalid request path")?.to_string();
-        let http_version = parts.next().ok_or("Invalid HTTP version")?.to_string();
+        let http_version = match parts.next().ok_or("Invalid HTTP version")? {
+            "HTTP/0.9" => HttpVersion::new(0, 9),
+            "HTTP/1.0" => HttpVersion::new(1, 0),
+            "HTTP/1.1" => HttpVersion::new(1, 1),
+            "HTTP/2.0" => HttpVersion::new(2, 0),
+            _ => return Err("Invalid HTTP version"),
+        };
 
         Ok((HttpMethod::from(method), target, http_version))
     }
@@ -56,9 +62,9 @@ impl HttpRequest {
         &self.target
     }
 
-    // pub fn http_version(&self) -> &str {
-    //     &self.http_version
-    // }
+    pub fn http_version(&self) -> &HttpVersion {
+        &self.http_version
+    }
 
     pub fn headers(&self) -> &Vec<HttpHeader> {
         &self.headers

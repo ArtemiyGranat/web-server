@@ -1,10 +1,10 @@
 use crate::header::HttpHeader;
+use crate::http_version::HttpVersion;
 use crate::status_code::HttpStatusCode;
 use crate::utils::CRLF;
 use std::fmt::Write;
 
 pub struct HttpResponse {
-    // http_version: String,
     status_code: HttpStatusCode,
     headers: Vec<HttpHeader>,
     body: String,
@@ -13,7 +13,6 @@ pub struct HttpResponse {
 impl HttpResponse {
     pub fn new(status_code: HttpStatusCode) -> Self {
         Self {
-            // http_version,
             status_code,
             headers: Vec::new(),
             body: String::new(),
@@ -41,21 +40,11 @@ impl HttpResponse {
     pub fn status_code(&self) -> &HttpStatusCode {
         &self.status_code
     }
-}
 
-impl ToString for HttpResponse {
-    // TODO: Is there a better way to do this?
-    fn to_string(&self) -> String {
+    pub fn to_string(&self, http_version: &HttpVersion) -> String {
         let mut response = String::new();
 
-        write!(
-            response,
-            "HTTP/1.1 {}{}",
-            // self.http_version,
-            self.status_code,
-            CRLF
-        )
-        .unwrap();
+        write!(response, "{} {}{}", http_version, self.status_code, CRLF).unwrap();
         for header in &self.headers {
             write!(response, "{}: {}{}", header.name(), header.value(), CRLF).unwrap();
         }
