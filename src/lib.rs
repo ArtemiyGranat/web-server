@@ -11,6 +11,7 @@ use std::{
 
 pub mod file;
 pub mod header;
+mod http_version;
 #[cfg(feature = "logger")]
 pub mod logger;
 pub mod method;
@@ -121,7 +122,7 @@ impl Server {
                 self.logger.request_received(&addr, &request);
 
                 let response = self.router.handle_request(&request);
-                self.send_response(&addr, &mut stream, &response);
+                self.send_response(&addr, &mut stream, &request, &response);
             }
             Err(e) => self
                 .logger
@@ -136,8 +137,14 @@ impl Server {
         Ok(raw_request)
     }
 
-    fn send_response(&self, _addr: &str, stream: &mut TcpStream, response: &HttpResponse) {
-        if let Err(e) = stream.write_all(response.to_string().as_bytes()) {
+    fn send_response(
+        &self,
+        _addr: &str,
+        stream: &mut TcpStream,
+        request: &HttpRequest,
+        response: &HttpResponse,
+    ) {
+        if let Err(e) = stream.write_all(response.to_string(request.http_version()).as_bytes()) {
             self.logger
                 .error(&format!("Could not write to stream: {}", e));
             return;
