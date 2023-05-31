@@ -75,29 +75,15 @@ impl Server {
         }
     }
 
-    pub fn serve<M>(&mut self, method: M, path: &str, handler: fn(Request) -> Response)
+    pub fn serve<M>(&mut self, method: M, target: &str, handler: fn(Request) -> Response)
     where
         M: Into<Method>,
     {
         let method = method.into();
         match method {
-            Method::Get => self.router.get(path, handler),
-            Method::Head => self.router.head(path, handler),
-            Method::Post => self.router.post(path, handler),
-            Method::Put => self.router.put(path, handler),
-            Method::Delete => self.router.delete(path, handler),
-            Method::Connect => self.router.connect(path, handler),
-            Method::Options => self.router.options(path, handler),
-            Method::Trace => self.router.trace(path, handler),
-            Method::Patch => self.router.patch(path, handler),
-            // TODO: Change unreachable!() to Method Not Allowed response
-            _ => unreachable!(),
+            Method::Unknown => self.logger.error("Invalid HTTP method".to_string()),
+            _ => self.router.add_route(method, target, handler),
         }
-    }
-
-    pub fn get(mut self, path: &str, handler: fn(Request) -> Response) -> Self {
-        self.router.get(path, handler);
-        self
     }
 
     // TODO: Add non-blocking I/O operations
