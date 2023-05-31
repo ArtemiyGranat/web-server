@@ -76,11 +76,11 @@ impl Server {
     }
 
     pub fn serve<M>(
-        &mut self,
+        mut self,
         method: M,
         target: &str,
         handler: fn(HttpRequest) -> HttpResponse,
-    ) -> &mut Self
+    ) -> Self
     where
         M: Into<HttpMethod>,
     {

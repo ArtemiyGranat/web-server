@@ -11,26 +11,31 @@ pub struct HttpResponse {
 }
 
 impl HttpResponse {
-    pub fn new<B>(status_code: HttpStatusCode, headers: Vec<HttpHeader>, body: B) -> Self
-    where
-        B: Into<String>,
-    {
-        let mut response = Self {
+    pub fn new(status_code: HttpStatusCode) -> Self {
+        Self {
             // http_version,
             status_code,
             headers: Vec::new(),
-            body: body.into(),
-        };
-
-        for header in headers {
-            response.add_header(header)
+            body: String::new(),
         }
-        response
     }
 
     // TODO: Add checks for forbidden headers
     pub fn add_header(&mut self, header: HttpHeader) {
         self.headers.push(header)
+    }
+
+    pub fn with_header(mut self, header: HttpHeader) -> Self {
+        self.add_header(header);
+        self
+    }
+
+    pub fn with_body<B>(mut self, body: B) -> Self
+    where
+        B: Into<String>,
+    {
+        self.body = body.into();
+        self
     }
 
     pub fn status_code(&self) -> &HttpStatusCode {

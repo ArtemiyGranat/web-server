@@ -15,20 +15,12 @@ struct Args {
     port: u16,
 }
 
-fn hello_handler(_request: HttpRequest) -> HttpResponse {
-    HttpResponse::new(
-        HttpStatusCode::OK,
-        Vec::new(),
-        File::new("static/index.html"),
-    )
+fn hello_handler(_: HttpRequest) -> HttpResponse {
+    HttpResponse::new(HttpStatusCode::OK).with_body(File::new("static/index.html"))
 }
 
-fn not_found_handler(_request: HttpRequest) -> HttpResponse {
-    HttpResponse::new(
-        HttpStatusCode::NOT_FOUND,
-        Vec::new(),
-        File::new("static/404.html"),
-    )
+fn not_found_handler(_: HttpRequest) -> HttpResponse {
+    HttpResponse::new(HttpStatusCode::NOT_FOUND).with_body(File::new("static/404.html"))
 }
 
 fn main() {

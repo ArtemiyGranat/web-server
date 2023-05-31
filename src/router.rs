@@ -49,16 +49,12 @@ impl Router {
                     None => HttpResponse::new(
                         // request.http_version().to_string(),
                         HttpStatusCode::NOT_FOUND,
-                        Vec::new(),
-                        String::new(),
                     ),
                 }
             }
             _ => HttpResponse::new(
                 // request.http_version().to_string(),
                 HttpStatusCode::BAD_REQUEST,
-                Vec::new(),
-                String::new(),
             ),
         }
     }
