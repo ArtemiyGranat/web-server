@@ -1,11 +1,9 @@
-use method::Method;
-use response::Response;
-
 #[cfg(feature = "logger")]
 use crate::logger::{LogLevel, Logger};
 #[cfg(not(feature = "logger"))]
 use crate::utils::DefaultLogger;
-use crate::{request::Request, router::Router};
+
+use crate::{method::HttpMethod, request::HttpRequest, response::HttpResponse, router::Router};
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -15,11 +13,11 @@ pub mod file;
 pub mod header;
 #[cfg(feature = "logger")]
 pub mod logger;
-mod method;
+pub mod method;
 pub mod request;
 pub mod response;
 pub mod router;
-mod status_code;
+pub mod status_code;
 mod utils;
 
 pub struct Server {
@@ -58,45 +56,42 @@ impl Server {
             Ok(listener) => {
                 #[cfg(feature = "logger")]
                 self.logger
-                    .info(format!("Server is listening at port {}", port));
+                    .info(&format!("Server is listening at port {}", port));
+
                 for stream in listener.incoming() {
                     match stream {
                         Ok(stream) => self.handle_connection(stream),
                         Err(e) => {
                             self.logger
-                                .error(format!("Could not accept connection: {}", e));
+                                .error(&format!("Could not accept connection: {}", e));
                         }
                     }
                 }
             }
             Err(e) => {
-                self.logger.error(format!("Could not bind a socket: {}", e));
+                self.logger
+                    .error(&format!("Could not bind a socket: {}", e));
             }
         }
     }
 
-    pub fn serve<M>(&mut self, method: M, path: &str, handler: fn(Request) -> Response)
+    pub fn serve<M>(
+        mut self,
+        method: M,
+        target: &str,
+        handler: fn(HttpRequest) -> HttpResponse,
+    ) -> Self
     where
-        M: Into<Method>,
+        M: Into<HttpMethod>,
     {
-        let method = method.into();
-        match method {
-            Method::Get => self.router.get(path, handler),
-            Method::Head => self.router.head(path, handler),
-            Method::Post => self.router.post(path, handler),
-            Method::Put => self.router.put(path, handler),
-            Method::Delete => self.router.delete(path, handler),
-            Method::Connect => self.router.connect(path, handler),
-            Method::Options => self.router.options(path, handler),
-            Method::Trace => self.router.trace(path, handler),
-            Method::Patch => self.router.patch(path, handler),
-            // TODO: Change unreachable!() to Method Not Allowed response
-            _ => unreachable!(),
+        match method.into() {
+            HttpMethod::Unknown => {
+                self.logger.error("Invalid HTTP method");
+            }
+            method => {
+                self.router.add_route(method, target, handler);
+            }
         }
-    }
-
-    pub fn get(mut self, path: &str, handler: fn(Request) -> Response) -> Self {
-        self.router.get(path, handler);
         self
     }
 
@@ -106,37 +101,51 @@ impl Server {
             Ok(addr) => addr.ip().to_string(),
             Err(e) => {
                 self.logger
-                    .error(format! {"Failed to detect IP address: {}", e});
+                    .error(&format! {"Failed to detect IP address: {}", e});
                 return;
             }
         };
 
+        let raw_request = match self.read_request(&mut stream) {
+            Ok(raw_request) => raw_request,
+            Err(e) => {
+                self.logger
+                    .error(&format!("Could not read request from {}: {}", addr, e));
+                return;
+            }
+        };
+
+        match HttpRequest::new(&raw_request) {
+            Ok(request) => {
+                #[cfg(feature = "logger")]
+                self.logger.request_received(&addr, &request);
+
+                let response = self.router.handle_request(&request);
+                self.send_response(&addr, &mut stream, &response);
+            }
+            Err(e) => self
+                .logger
+                .error(&format!("Could not parse a request from {}: {}", addr, e)),
+        }
+    }
+
+    fn read_request(&self, stream: &mut TcpStream) -> Result<String, std::io::Error> {
         let mut buffer = [0; 1024];
-        if let Err(e) = stream.read(&mut buffer) {
-            self.logger
-                .error(format!("Could not read from stream: {}", e));
-            return;
-        }
-        let raw_request = String::from_utf8_lossy(&buffer);
-        let request = Request::new(&raw_request);
-        if let Err(e) = request {
-            self.logger
-                .error(format!("Could not parse a request from {}: {}", addr, e));
-            return;
-        }
-        let request = request.unwrap();
-        #[cfg(feature = "logger")]
-        self.logger.request_received(&addr, &request);
-        let response = self.router.handle_request(&request);
+        let bytes_read = stream.read(&mut buffer)?;
+        let raw_request = String::from_utf8_lossy(&buffer[..bytes_read]).to_string();
+        Ok(raw_request)
+    }
+
+    fn send_response(&self, _addr: &str, stream: &mut TcpStream, response: &HttpResponse) {
         if let Err(e) = stream.write_all(response.to_string().as_bytes()) {
             self.logger
-                .error(format!("Could not write to stream: {}", e));
+                .error(&format!("Could not write to stream: {}", e));
             return;
         }
         #[cfg(feature = "logger")]
-        self.logger.request_completed(&addr, &response);
+        self.logger.request_completed(&_addr, &response);
         if let Err(e) = stream.flush() {
-            self.logger.error(format!("Could not flush stream: {}", e));
+            self.logger.error(&format!("Could not flush stream: {}", e));
         }
     }
 }

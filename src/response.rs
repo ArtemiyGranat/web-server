@@ -1,51 +1,58 @@
-use crate::header::Header;
-use crate::status_code::StatusCode;
+use crate::header::HttpHeader;
+use crate::status_code::HttpStatusCode;
 use crate::utils::CRLF;
 use std::fmt::Write;
 
-pub struct Response {
-    status_code: StatusCode,
-    headers: Vec<Header>,
+pub struct HttpResponse {
+    // http_version: String,
+    status_code: HttpStatusCode,
+    headers: Vec<HttpHeader>,
     body: String,
 }
 
-impl Response {
-    pub fn new<B>(status_code: u16, headers: Vec<Header>, body: B) -> Self
-    where
-        B: Into<String>,
-    {
-        let mut response = Self {
-            status_code: StatusCode::new(status_code),
+impl HttpResponse {
+    pub fn new(status_code: HttpStatusCode) -> Self {
+        Self {
+            // http_version,
+            status_code,
             headers: Vec::new(),
-            body: body.into(),
-        };
-
-        for header in headers {
-            response.add_header(header)
+            body: String::new(),
         }
-        response
     }
 
     // TODO: Add checks for forbidden headers
-    pub fn add_header(&mut self, header: Header) {
+    pub fn add_header(&mut self, header: HttpHeader) {
         self.headers.push(header)
     }
 
-    pub fn status_code(&self) -> &StatusCode {
+    pub fn with_header(mut self, header: HttpHeader) -> Self {
+        self.add_header(header);
+        self
+    }
+
+    pub fn with_body<B>(mut self, body: B) -> Self
+    where
+        B: Into<String>,
+    {
+        self.body = body.into();
+        self
+    }
+
+    pub fn status_code(&self) -> &HttpStatusCode {
         &self.status_code
     }
 }
 
-impl ToString for Response {
+impl ToString for HttpResponse {
     // TODO: Is there a better way to do this?
     fn to_string(&self) -> String {
         let mut response = String::new();
 
         write!(
             response,
-            "HTTP/1.1 {} {}{}",
-            self.status_code.code(),
-            self.status_code.description(),
+            "HTTP/1.1 {}{}",
+            // self.http_version,
+            self.status_code,
             CRLF
         )
         .unwrap();

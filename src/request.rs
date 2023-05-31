@@ -1,38 +1,21 @@
-use crate::{header::Header, method::Method};
+use crate::{header::HttpHeader, method::HttpMethod};
 
 #[derive(Clone)]
-pub struct Request {
-    method: Method,
+pub struct HttpRequest {
+    method: HttpMethod,
     target: String,
-    // Should I always use HTTP version equals 1.1 or parse it from request?...
-    // protocol: String,
-    headers: Vec<Header>,
+    // http_version: String,
+    headers: Vec<HttpHeader>,
     body: String,
 }
 
-impl Request {
+impl HttpRequest {
     // TODO: HTTP version handling and code refactoring
     pub fn new(raw_request: &str) -> Result<Self, &str> {
         let mut lines = raw_request.lines();
 
-        let mut request_line = lines
-            .next()
-            .ok_or("Invalid request")?
-            .split_ascii_whitespace();
-
-        let method = request_line
-            .next()
-            .ok_or("Invalid request method")?
-            .to_string();
-
-        let target = request_line
-            .next()
-            .ok_or("Invalid request path")?
-            .to_string();
-        let http_version = request_line
-            .next()
-            .ok_or("Invalid HTTP version")?
-            .to_string();
+        let request_line = lines.next().ok_or("Invalid request")?;
+        let (method, target, _http_version) = Self::parse_request_line(request_line)?;
 
         let mut headers = Vec::new();
         for header_line in lines.by_ref() {
@@ -43,19 +26,29 @@ impl Request {
             let mut parts = header_line.split(':');
             let name = parts.next().ok_or("Invalid header")?.trim().to_string();
             let value = parts.next().ok_or("Invalid header")?.trim().to_string();
-            headers.push(Header::new(name, value));
+            headers.push(HttpHeader::new(name, value));
         }
 
         let body = lines.collect::<Vec<_>>().join("\n");
         Ok(Self {
-            method: Method::from(method.as_ref()),
+            method,
             target,
+            // http_version,
             headers,
             body,
         })
     }
 
-    pub fn method(&self) -> &Method {
+    fn parse_request_line(line: &str) -> Result<(HttpMethod, String, String), &str> {
+        let mut parts = line.split(' ');
+        let method = parts.next().ok_or("Invalid request method")?;
+        let target = parts.next().ok_or("Invalid request path")?.to_string();
+        let http_version = parts.next().ok_or("Invalid HTTP version")?.to_string();
+
+        Ok((HttpMethod::from(method), target, http_version))
+    }
+
+    pub fn method(&self) -> &HttpMethod {
         &self.method
     }
 
@@ -63,7 +56,11 @@ impl Request {
         &self.target
     }
 
-    pub fn headers(&self) -> &Vec<Header> {
+    // pub fn http_version(&self) -> &str {
+    //     &self.http_version
+    // }
+
+    pub fn headers(&self) -> &Vec<HttpHeader> {
         &self.headers
     }
 

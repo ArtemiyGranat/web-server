@@ -1,11 +1,10 @@
-use crate::{request::Request, response::Response};
+use crate::{request::HttpRequest, response::HttpResponse};
 use chrono::Local;
 
 #[derive(PartialEq, PartialOrd)]
 pub enum LogLevel {
     Debug,
     Info,
-    // TODO: Do I need warning level?
     Warning,
     Error,
 }
@@ -48,14 +47,12 @@ impl Logger {
         }
     }
 
-    pub fn colored(self) -> Self {
-        Self {
-            level: self.level,
-            colored: true,
-        }
+    pub fn colored(mut self) -> Self {
+        self.colored = true;
+        self
     }
 
-    pub fn log(&self, level: LogLevel, msg: String) {
+    pub fn log(&self, level: LogLevel, msg: &str) {
         if level >= self.level {
             let current_time = Local::now().format("%d-%m-%Y %H:%M:%S");
             let level = if self.colored {
@@ -67,37 +64,39 @@ impl Logger {
         }
     }
 
-    pub fn debug(&self, msg: String) {
-        self.log(LogLevel::Debug, msg);
+    pub fn debug(&self, msg: &str) {
+        self.log(LogLevel::Debug, &msg);
     }
 
-    pub fn info(&self, msg: String) {
-        self.log(LogLevel::Info, msg);
+    pub fn info(&self, msg: &str) {
+        self.log(LogLevel::Info, &msg);
     }
 
-    pub fn warning(&self, msg: String) {
-        self.log(LogLevel::Warning, msg);
+    pub fn warning(&self, msg: &str) {
+        self.log(LogLevel::Warning, &msg);
     }
 
-    pub fn error(&self, msg: String) {
-        self.log(LogLevel::Error, msg);
+    pub fn error(&self, msg: &str) {
+        self.log(LogLevel::Error, &msg);
     }
 
-    pub fn request_received(&self, addr: &str, request: &Request) {
-        self.info(format!(
+    pub fn request_received(&self, addr: &str, request: &HttpRequest) {
+        let msg = format!(
             "[{}] Incoming request: {} {}",
             addr,
             request.method().as_str(),
             request.target()
-        ));
+        );
+        self.info(&msg);
     }
 
-    pub fn request_completed(&self, addr: &str, response: &Response) {
-        self.info(format!(
+    pub fn request_completed(&self, addr: &str, response: &HttpResponse) {
+        let msg = format!(
             "[{}] Request completed with {} {}",
             addr,
             response.status_code().code(),
             response.status_code().description()
-        ));
+        );
+        self.info(&msg);
     }
 }

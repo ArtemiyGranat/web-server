@@ -1,5 +1,8 @@
 use clap::Parser;
-use web_server::{file::File, request::Request, response::Response, Server};
+use web_server::{
+    file::File, method::HttpMethod, request::HttpRequest, response::HttpResponse,
+    status_code::HttpStatusCode, Server,
+};
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -12,17 +15,18 @@ struct Args {
     port: u16,
 }
 
-fn hello_handler(_request: Request) -> Response {
-    Response::new(200, Vec::new(), File::new("static/index.html"))
+fn hello_handler(_: HttpRequest) -> HttpResponse {
+    HttpResponse::new(HttpStatusCode::OK).with_body(File::new("static/index.html"))
 }
 
-fn setup_router(server: &mut Server) {
-    server.serve("GET", "/", hello_handler);
+fn not_found_handler(_: HttpRequest) -> HttpResponse {
+    HttpResponse::new(HttpStatusCode::NOT_FOUND).with_body(File::new("static/404.html"))
 }
 
 fn main() {
     let args = Args::parse();
-    let mut server = Server::new();
-    setup_router(&mut server);
-    server.run(&args.address, args.port);
+    let mut server = Server::new()
+        .serve(HttpMethod::Get, "/", hello_handler)
+        .serve(HttpMethod::Get, "/find_me", not_found_handler)
+        .run(&args.address, args.port);
 }

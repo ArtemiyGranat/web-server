@@ -1,26 +1,25 @@
+use crate::{
+    method::HttpMethod, request::HttpRequest, response::HttpResponse, status_code::HttpStatusCode,
+};
 use std::collections::HashMap;
 
-use crate::{
-    method::Method,
-    request::Request,
-    response::Response,
-};
-
 #[derive(PartialEq, Eq, Hash)]
-pub struct RouteKey {
-    method: Method,
+struct RouteKey {
+    method: HttpMethod,
     target: String,
 }
 
 impl RouteKey {
-    pub fn new(method: Method, target: String) -> Self {
+    fn new(method: HttpMethod, target: String) -> Self {
         Self { method, target }
     }
 }
 
+type RouteMap = HashMap<RouteKey, fn(HttpRequest) -> HttpResponse>;
+
 #[derive(Default)]
 pub struct Router {
-    routes: HashMap<RouteKey, fn(Request) -> Response>,
+    routes: RouteMap,
 }
 
 impl Router {
@@ -30,57 +29,33 @@ impl Router {
         }
     }
 
-    fn add_route(&mut self, route_key: RouteKey, handler: fn(Request) -> Response) {
+    pub fn add_route(
+        &mut self,
+        method: HttpMethod,
+        target: &str,
+        handler: fn(HttpRequest) -> HttpResponse,
+    ) {
+        let route_key = RouteKey::new(method, target.to_string());
         self.routes.insert(route_key, handler);
     }
 
-    pub fn get(&mut self, target: &str, handler: fn(Request) -> Response) {
-        self.add_route(RouteKey::new(Method::Get, target.to_string()), handler)
-    }
-
-    pub fn head(&mut self, target: &str, handler: fn(Request) -> Response) {
-        self.add_route(RouteKey::new(Method::Head, target.to_string()), handler)
-    }
-
-    pub fn post(&mut self, target: &str, handler: fn(Request) -> Response) {
-        self.add_route(RouteKey::new(Method::Post, target.to_string()), handler)
-    }
-
-    pub fn put(&mut self, target: &str, handler: fn(Request) -> Response) {
-        self.add_route(RouteKey::new(Method::Put, target.to_string()), handler)
-    }
-
-    pub fn delete(&mut self, target: &str, handler: fn(Request) -> Response) {
-        self.add_route(RouteKey::new(Method::Delete, target.to_string()), handler)
-    }
-
-    pub fn connect(&mut self, target: &str, handler: fn(Request) -> Response) {
-        self.add_route(RouteKey::new(Method::Connect, target.to_string()), handler)
-    }
-
-    pub fn options(&mut self, target: &str, handler: fn(Request) -> Response) {
-        self.add_route(RouteKey::new(Method::Options, target.to_string()), handler)
-    }
-
-    pub fn trace(&mut self, target: &str, handler: fn(Request) -> Response) {
-        self.add_route(RouteKey::new(Method::Trace, target.to_string()), handler)
-    }
-
-    pub fn patch(&mut self, target: &str, handler: fn(Request) -> Response) {
-        self.add_route(RouteKey::new(Method::Patch, target.to_string()), handler)
-    }
-
     // TODO: Add method not allowed or bad request or smth
-    pub fn handle_request(&self, request: &Request) -> Response {
+    pub fn handle_request(&self, request: &HttpRequest) -> HttpResponse {
         match request.method() {
-            Method::Get => {
-                let route_key = RouteKey::new(Method::Get, request.target().to_string());
+            HttpMethod::Get => {
+                let route_key = RouteKey::new(HttpMethod::Get, request.target().to_string());
                 match self.routes.get(&route_key) {
                     Some(handler) => handler(request.clone()),
-                    None => Response::new(404, Vec::new(), String::new()),
+                    None => HttpResponse::new(
+                        // request.http_version().to_string(),
+                        HttpStatusCode::NOT_FOUND,
+                    ),
                 }
             }
-            _ => Response::new(400, Vec::new(), String::new()),
+            _ => HttpResponse::new(
+                // request.http_version().to_string(),
+                HttpStatusCode::BAD_REQUEST,
+            ),
         }
     }
 }
