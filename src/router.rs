@@ -1,4 +1,6 @@
-use crate::{method::HttpMethod, request::HttpRequest, response::HttpResponse, status_code::HttpStatusCode};
+use crate::{
+    method::HttpMethod, request::HttpRequest, response::HttpResponse, status_code::HttpStatusCode,
+};
 use std::collections::HashMap;
 
 #[derive(PartialEq, Eq, Hash)]

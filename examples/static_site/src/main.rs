@@ -23,13 +23,18 @@ fn hello_handler(_request: HttpRequest) -> HttpResponse {
     )
 }
 
-fn setup_router(server: &mut Server) {
-    server.serve(HttpMethod::Get, "/", hello_handler);
+fn not_found_handler(_request: HttpRequest) -> HttpResponse {
+    HttpResponse::new(
+        HttpStatusCode::NOT_FOUND,
+        Vec::new(),
+        File::new("static/404.html"),
+    )
 }
 
 fn main() {
     let args = Args::parse();
-    let mut server = Server::new();
-    setup_router(&mut server);
-    server.run(&args.address, args.port);
+    let mut server = Server::new()
+        .serve(HttpMethod::Get, "/", hello_handler)
+        .serve(HttpMethod::Get, "/find_me", not_found_handler)
+        .run(&args.address, args.port);
 }

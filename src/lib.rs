@@ -69,19 +69,30 @@ impl Server {
                 }
             }
             Err(e) => {
-                self.logger.error(&format!("Could not bind a socket: {}", e));
+                self.logger
+                    .error(&format!("Could not bind a socket: {}", e));
             }
         }
     }
 
-    pub fn serve<M>(&mut self, method: M, target: &str, handler: fn(HttpRequest) -> HttpResponse)
+    pub fn serve<M>(
+        &mut self,
+        method: M,
+        target: &str,
+        handler: fn(HttpRequest) -> HttpResponse,
+    ) -> &mut Self
     where
         M: Into<HttpMethod>,
     {
         match method.into() {
-            HttpMethod::Unknown => self.logger.error("Invalid HTTP method"),
-            method => self.router.add_route(method, target, handler),
+            HttpMethod::Unknown => {
+                self.logger.error("Invalid HTTP method");
+            }
+            method => {
+                self.router.add_route(method, target, handler);
+            }
         }
+        self
     }
 
     // TODO: Add non-blocking I/O operations

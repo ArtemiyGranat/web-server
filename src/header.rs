@@ -4,7 +4,6 @@ pub struct HttpHeader {
     value: String,
 }
 
-
 impl HttpHeader {
     pub fn new(name: String, value: String) -> Self {
         Self { name, value }
