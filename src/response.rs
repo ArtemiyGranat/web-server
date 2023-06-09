@@ -4,6 +4,7 @@ use crate::status_code::HttpStatusCode;
 use crate::utils::CRLF;
 use std::fmt::Write;
 
+/// An HTTP response.
 pub struct HttpResponse {
     status_code: HttpStatusCode,
     headers: Vec<HttpHeader>,
@@ -11,24 +12,27 @@ pub struct HttpResponse {
 }
 
 impl HttpResponse {
+    /// Creates a new `HttpResponse` with specific HTTP status code.
     pub fn new(status_code: HttpStatusCode) -> Self {
         Self {
             status_code,
             headers: Vec::new(),
-            body: String::new(),
+            body: format!("{}", status_code),
         }
     }
 
     // TODO: Add checks for forbidden headers
-    pub fn add_header(&mut self, header: HttpHeader) {
+    fn add_header(&mut self, header: HttpHeader) {
         self.headers.push(header)
     }
 
+    /// Constructs a `Response` with specific header.
     pub fn with_header(mut self, header: HttpHeader) -> Self {
         self.add_header(header);
         self
     }
 
+    /// Constructs a `Response` with specific body.
     pub fn with_body<B>(mut self, body: B) -> Self
     where
         B: Into<String>,
@@ -37,10 +41,12 @@ impl HttpResponse {
         self
     }
 
+    /// Returns the response's HTTP status code.
     pub fn status_code(&self) -> &HttpStatusCode {
         &self.status_code
     }
 
+    /// Returns a `String` representation of the HTTP response.
     pub fn to_string(&self, http_version: &HttpVersion) -> String {
         let mut response = String::new();
 

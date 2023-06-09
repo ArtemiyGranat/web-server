@@ -1,9 +1,30 @@
+//! # Simple usage
+//! ```no_run
+//! use web_server::request::HttpRequest;
+//! use web_server::response::HttpResponse;
+//! use web_server::Server;
+//! use web_server::method::HttpMethod;
+//! use web_server::status_code::HttpStatusCode;
+//! 
+//! fn hello_world(_: HttpRequest) -> HttpResponse {
+//!     HttpResponse::new(HttpStatusCode::OK).with_body("Hello, world!")
+//! }
+//!
+//! fn main() {
+//!     Server::new()
+//!         .serve(HttpMethod::Get, "/", hello_world)
+//!         .run("localhost", 8080)
+//! }
+//! ```
 #[cfg(feature = "logger")]
 use crate::logger::{LogLevel, Logger};
+use crate::method::HttpMethod;
+use crate::request::HttpRequest;
+use crate::response::HttpResponse;
+use crate::router::Router;
 #[cfg(not(feature = "logger"))]
 use crate::utils::DefaultLogger;
 
-use crate::{method::HttpMethod, request::HttpRequest, response::HttpResponse, router::Router};
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -11,9 +32,9 @@ use std::{
 
 pub mod file;
 pub mod header;
-mod http_version;
+pub mod http_version;
 #[cfg(feature = "logger")]
-pub mod logger;
+mod logger;
 pub mod method;
 pub mod request;
 pub mod response;
@@ -21,6 +42,24 @@ pub mod router;
 pub mod status_code;
 mod utils;
 
+/// An HTTP server.
+/// # Examples
+/// ```no_run
+/// use web_server::request::HttpRequest;
+/// use web_server::response::HttpResponse;
+/// use web_server::Server;
+/// use web_server::method::HttpMethod;
+/// use web_server::status_code::HttpStatusCode;
+/// fn hello_world(_: HttpRequest) -> HttpResponse {
+///     HttpResponse::new(HttpStatusCode::OK).with_body("Hello, world!")
+/// }
+///
+/// fn main() {
+///     Server::new()
+///         .serve(HttpMethod::Get, "/", hello_world)
+///         .run("localhost", 8080)
+/// }
+/// ```
 pub struct Server {
     router: Router,
     #[cfg(feature = "logger")]
@@ -31,17 +70,17 @@ pub struct Server {
 
 impl Default for Server {
     fn default() -> Self {
-        Self {
-            router: Router::new(),
-            #[cfg(feature = "logger")]
-            logger: Logger::new(LogLevel::Debug).colored(),
-            #[cfg(not(feature = "logger"))]
-            logger: DefaultLogger::new(),
-        }
+        Self::new()
     }
 }
 
 impl Server {
+    // TODO: `ignore` -> `no_run`
+    /// Creates a new `Server`.
+    /// # Example
+    /// ```ignore
+    /// Server::new()
+    /// ```
     pub fn new() -> Self {
         Self {
             router: Router::new(),
@@ -52,6 +91,11 @@ impl Server {
         }
     }
 
+    /// Binds the server to address and port and starts listening to connections
+    /// # Example
+    /// ```ignore
+    /// Server::new().run("localhost", 8080)
+    /// ```
     pub fn run(&self, address: &str, port: u16) {
         match TcpListener::bind((address, port)) {
             Ok(listener) => {
@@ -76,6 +120,9 @@ impl Server {
         }
     }
 
+    /// Serves an incoming HTTP request and sends a response to it.
+    /// Check the [`HttpMethod`](crate::method::HttpMethod) docs to see
+    /// the available HTTP methods.
     pub fn serve<M>(
         mut self,
         method: M,

@@ -1,5 +1,7 @@
 use std::fmt;
 
+/// An HTTP response's status code.
+#[derive(Clone, Copy)]
 pub struct HttpStatusCode(u16);
 
 // TODO: Implement unknown code const/struct/etc
@@ -71,10 +73,12 @@ impl HttpStatusCode {
     pub const NOT_EXTENDED: HttpStatusCode = HttpStatusCode(510);
     pub const NETWORK_AUTHENTICATION_REQUIRED: HttpStatusCode = HttpStatusCode(511);
 
+    /// Returns the response's status code.
     pub fn code(&self) -> u16 {
         self.0
     }
 
+    /// Returns the status code's description.
     pub fn description(&self) -> &'static str {
         match self.0 {
             100 => "Continue",

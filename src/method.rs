@@ -1,3 +1,4 @@
+/// The request's HTTP method.
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum HttpMethod {
     Get,
@@ -30,6 +31,7 @@ impl From<&str> for HttpMethod {
 }
 
 impl HttpMethod {
+    /// Returns a `&str` representation of the HTTP method.
     pub fn as_str(&self) -> &str {
         match self {
             HttpMethod::Get => "GET",
