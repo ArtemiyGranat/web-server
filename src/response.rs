@@ -15,7 +15,7 @@ impl HttpResponse {
         Self {
             status_code,
             headers: Vec::new(),
-            body: String::new(),
+            body: format!("{}", status_code),
         }
     }
 

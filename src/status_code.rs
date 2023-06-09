@@ -1,5 +1,6 @@
 use std::fmt;
 
+#[derive(Clone, Copy)]
 pub struct HttpStatusCode(u16);
 
 // TODO: Implement unknown code const/struct/etc
