@@ -31,13 +31,7 @@ pub struct Server {
 
 impl Default for Server {
     fn default() -> Self {
-        Self {
-            router: Router::new(),
-            #[cfg(feature = "logger")]
-            logger: Logger::new(LogLevel::Debug).colored(),
-            #[cfg(not(feature = "logger"))]
-            logger: DefaultLogger::new(),
-        }
+        Self::new()
     }
 }
 
