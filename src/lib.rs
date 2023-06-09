@@ -1,9 +1,20 @@
-#[cfg(feature = "logger")]
-use crate::logger::{LogLevel, Logger};
-#[cfg(not(feature = "logger"))]
-use crate::utils::DefaultLogger;
+#![warn(missing_docs)]
 
-use crate::{method::HttpMethod, request::HttpRequest, response::HttpResponse, router::Router};
+#[cfg(feature = "logger")]
+#[cfg_attr(docsrs, doc(cfg(feature = "logger")))]
+#[doc(inline)]
+pub use crate::logger::{LogLevel, Logger};
+#[doc(inline)]
+pub use method::HttpMethod;
+#[doc(inline)]
+pub use request::HttpRequest;
+#[doc(inline)]
+pub use response::HttpResponse;
+#[doc(inline)]
+pub use router::Router;
+#[cfg(not(feature = "logger"))]
+pub use utils::DefaultLogger;
+
 use std::{
     io::{Read, Write},
     net::{TcpListener, TcpStream},
@@ -51,7 +62,7 @@ impl Default for Server {
 impl Server {
     /// Creates a new `Server`.
     /// # Example
-    /// ```
+    /// ```no_run
     /// Server::new()
     /// ```
     pub fn new() -> Self {
@@ -66,7 +77,7 @@ impl Server {
 
     /// Binds the server to address and port and starts listening to connections
     /// # Example
-    /// ```
+    /// ```no_run
     /// Server::new().run("localhost", 8080)
     /// ```
     pub fn run(&self, address: &str, port: u16) {
