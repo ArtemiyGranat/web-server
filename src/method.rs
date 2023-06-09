@@ -1,14 +1,25 @@
+/// The request's HTTP method.
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum HttpMethod {
+    /// GET method
     Get,
+    /// HEAD method
     Head,
+    /// POST method
     Post,
+    /// PUT method
     Put,
+    /// DELETE method
     Delete,
+    /// CONNECT method
     Connect,
+    /// OPTIONS method
     Options,
+    /// TRACE method
     Trace,
+    /// PATCH method
     Patch,
+    /// Unknown method
     Unknown,
 }
 
@@ -30,6 +41,7 @@ impl From<&str> for HttpMethod {
 }
 
 impl HttpMethod {
+    /// Returns a `&str` representation of the HTTP method.
     pub fn as_str(&self) -> &str {
         match self {
             HttpMethod::Get => "GET",
