@@ -1,25 +1,15 @@
 /// The request's HTTP method.
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub enum HttpMethod {
-    /// GET method
     Get,
-    /// HEAD method
     Head,
-    /// POST method
     Post,
-    /// PUT method
     Put,
-    /// DELETE method
     Delete,
-    /// CONNECT method
     Connect,
-    /// OPTIONS method
     Options,
-    /// TRACE method
     Trace,
-    /// PATCH method
     Patch,
-    /// Unknown method
     Unknown,
 }
 
