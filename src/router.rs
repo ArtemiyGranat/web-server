@@ -17,18 +17,21 @@ impl RouteKey {
 
 type RouteMap = HashMap<RouteKey, fn(HttpRequest) -> HttpResponse>;
 
+/// An HTTP router. Routes the HTTP requests to particular handlers.
 #[derive(Default)]
 pub struct Router {
     routes: RouteMap,
 }
 
 impl Router {
+    /// Creates a new `Router`.
     pub fn new() -> Self {
         Self {
             routes: HashMap::new(),
         }
     }
 
+    /// Adds a new route to `Router`.
     pub fn add_route(
         &mut self,
         method: HttpMethod,
@@ -40,6 +43,7 @@ impl Router {
     }
 
     // TODO: Add method not allowed or bad request or smth
+    /// Handles the incoming `Request` and returns `Response`.
     pub fn handle_request(&self, request: &HttpRequest) -> HttpResponse {
         match request.method() {
             HttpMethod::Get => {
