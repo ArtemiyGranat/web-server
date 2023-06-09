@@ -21,6 +21,19 @@ pub mod router;
 pub mod status_code;
 mod utils;
 
+/// An HTTP server.
+/// # Examples
+/// ```no_run
+/// fn hello_world(_: HttpRequest) -> HttpResponse {
+///     HttpResponse::new(HttpStatusCode::OK).with_body("Hello, world!")
+/// }
+///
+/// fn main() {
+///     Server::new()
+///         .serve(HttpMethod::Get, "/", hello_world)
+///         .run("localhost", 8080)
+/// }
+/// ```
 pub struct Server {
     router: Router,
     #[cfg(feature = "logger")]
@@ -36,6 +49,11 @@ impl Default for Server {
 }
 
 impl Server {
+    /// Creates a new `Server`.
+    /// # Example
+    /// ```
+    /// Server::new()
+    /// ```
     pub fn new() -> Self {
         Self {
             router: Router::new(),
@@ -46,6 +64,11 @@ impl Server {
         }
     }
 
+    /// Binds the server to address and port and starts listening to connections
+    /// # Example
+    /// ```
+    /// Server::new().run("localhost", 8080)
+    /// ```
     pub fn run(&self, address: &str, port: u16) {
         match TcpListener::bind((address, port)) {
             Ok(listener) => {
@@ -70,6 +93,9 @@ impl Server {
         }
     }
 
+    /// Serves an incoming HTTP request and sends a response to it.
+    /// Check the [`HttpMethod`](crate::method::HttpMethod) docs to see
+    /// the available HTTP methods.
     pub fn serve<M>(
         mut self,
         method: M,

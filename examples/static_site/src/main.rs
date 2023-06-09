@@ -25,8 +25,8 @@ fn not_found_handler(_: HttpRequest) -> HttpResponse {
 
 fn main() {
     let args = Args::parse();
-    let mut server = Server::new()
+    Server::new()
         .serve(HttpMethod::Get, "/", hello_handler)
         .serve(HttpMethod::Get, "/find_me", not_found_handler)
-        .run(&args.address, args.port);
+        .run(&args.address, args.port)
 }
