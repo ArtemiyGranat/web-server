@@ -1,11 +1,6 @@
 # HTTP Library (WIP)
 This is a tiny HTTP library that allows people to configure and run a web server with just few lines of code. 
 
-* [Docs](#docs)
-* [Content](#content)
-* [Dependencies](#dependencies)
-* [To-do](#to-do)
-
 ## Docs
 ```
 cargo doc --open
