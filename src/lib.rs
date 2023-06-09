@@ -1,5 +1,11 @@
 //! # Simple usage
 //! ```no_run
+//! use web_server::request::HttpRequest;
+//! use web_server::response::HttpResponse;
+//! use web_server::Server;
+//! use web_server::method::HttpMethod;
+//! use web_server::status_code::HttpStatusCode;
+//! 
 //! fn hello_world(_: HttpRequest) -> HttpResponse {
 //!     HttpResponse::new(HttpStatusCode::OK).with_body("Hello, world!")
 //! }
@@ -39,6 +45,11 @@ mod utils;
 /// An HTTP server.
 /// # Examples
 /// ```no_run
+/// use web_server::request::HttpRequest;
+/// use web_server::response::HttpResponse;
+/// use web_server::Server;
+/// use web_server::method::HttpMethod;
+/// use web_server::status_code::HttpStatusCode;
 /// fn hello_world(_: HttpRequest) -> HttpResponse {
 ///     HttpResponse::new(HttpStatusCode::OK).with_body("Hello, world!")
 /// }
@@ -64,9 +75,10 @@ impl Default for Server {
 }
 
 impl Server {
+    // TODO: `ignore` -> `no_run`
     /// Creates a new `Server`.
     /// # Example
-    /// ```no_run
+    /// ```ignore
     /// Server::new()
     /// ```
     pub fn new() -> Self {
@@ -81,7 +93,7 @@ impl Server {
 
     /// Binds the server to address and port and starts listening to connections
     /// # Example
-    /// ```no_run
+    /// ```ignore
     /// Server::new().run("localhost", 8080)
     /// ```
     pub fn run(&self, address: &str, port: u16) {
