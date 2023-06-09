@@ -1,19 +1,23 @@
-#![warn(missing_docs)]
-
+//! # Simple usage
+//! ```no_run
+//! fn hello_world(_: HttpRequest) -> HttpResponse {
+//!     HttpResponse::new(HttpStatusCode::OK).with_body("Hello, world!")
+//! }
+//!
+//! fn main() {
+//!     Server::new()
+//!         .serve(HttpMethod::Get, "/", hello_world)
+//!         .run("localhost", 8080)
+//! }
+//! ```
 #[cfg(feature = "logger")]
-#[cfg_attr(docsrs, doc(cfg(feature = "logger")))]
-#[doc(inline)]
-pub use crate::logger::{LogLevel, Logger};
-#[doc(inline)]
-pub use method::HttpMethod;
-#[doc(inline)]
-pub use request::HttpRequest;
-#[doc(inline)]
-pub use response::HttpResponse;
-#[doc(inline)]
-pub use router::Router;
+use crate::logger::{LogLevel, Logger};
+use crate::method::HttpMethod;
+use crate::request::HttpRequest;
+use crate::response::HttpResponse;
+use crate::router::Router;
 #[cfg(not(feature = "logger"))]
-pub use utils::DefaultLogger;
+use crate::utils::DefaultLogger;
 
 use std::{
     io::{Read, Write},
@@ -22,9 +26,9 @@ use std::{
 
 pub mod file;
 pub mod header;
-mod http_version;
+pub mod http_version;
 #[cfg(feature = "logger")]
-pub mod logger;
+mod logger;
 pub mod method;
 pub mod request;
 pub mod response;
