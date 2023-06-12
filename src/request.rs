@@ -8,7 +8,6 @@ pub struct HttpRequest {
     http_version: HttpVersion,
     headers: Vec<HttpHeader>,
     body: String,
-    params: Option<Vec<String>>,
 }
 
 impl HttpRequest {
@@ -38,7 +37,6 @@ impl HttpRequest {
             http_version,
             headers,
             body,
-            params: None,
         })
     }
 

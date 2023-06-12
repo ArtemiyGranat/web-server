@@ -7,12 +7,12 @@ use std::collections::HashMap;
 #[derive(PartialEq, Eq, Hash)]
 struct RouteKey {
     method: HttpMethod,
-    target: Path,
+    path: Path,
 }
 
 impl RouteKey {
-    fn new(method: HttpMethod, target: Path) -> Self {
-        Self { method, target }
+    fn new(method: HttpMethod, path: Path) -> Self {
+        Self { method, path }
     }
 }
 
@@ -46,21 +46,28 @@ impl Router {
     // TODO: Add method not allowed or bad request or smth
     /// Handles the incoming `Request` and returns `Response`.
     pub fn handle_request(&self, request: &HttpRequest) -> HttpResponse {
-        match request.method() {
-            HttpMethod::Get => {
-                let route_key = RouteKey::new(HttpMethod::Get, request.path().clone());
-                match self.routes.get(&route_key) {
-                    Some(handler) => handler(request.clone()),
-                    None => HttpResponse::new(
-                        // request.http_version().to_string(),
-                        HttpStatusCode::NOT_FOUND,
-                    ),
+        if let Some(path) = self.find_matching_path(request.path()) {
+            match request.method() {
+                HttpMethod::Get => {
+                    let route_key = RouteKey::new(HttpMethod::Get, path.clone());
+                    if let Some(handler) = self.routes.get(&route_key) {
+                        return handler(request.clone());
+                    }
+                    HttpResponse::new(HttpStatusCode::NOT_FOUND)
                 }
+                _ => HttpResponse::new(HttpStatusCode::BAD_REQUEST),
             }
-            _ => HttpResponse::new(
-                // request.http_version().to_string(),
-                HttpStatusCode::BAD_REQUEST,
-            ),
+        } else {
+            HttpResponse::new(HttpStatusCode::BAD_REQUEST)
         }
+    }
+
+    fn find_matching_path(&self, request_path: &Path) -> Option<&Path> {
+        for (route_key, _) in self.routes.iter() {
+            if route_key.path.matches_route(request_path) {
+                return Some(&route_key.path);
+            }
+        }
+        None
     }
 }
