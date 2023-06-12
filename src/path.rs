@@ -1,14 +1,13 @@
-use crate::request::HttpRequest;
-
+#[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct Path {
-    target: String,
     query_idx: Option<usize>,
+    path: String,
 }
 
 impl Path {
-    pub fn new(req: HttpRequest) -> Self {
+    pub fn new(path: String) -> Self {
         let mut query_idx = None;
-        for (idx, c) in req.target().chars().enumerate() {
+        for (idx, c) in path.chars().enumerate() {
             if c == '?' {
                 query_idx = Some(idx);
                 break;
@@ -16,22 +15,22 @@ impl Path {
         }
 
         Self {
-            target: req.target().to_string(),
+            path,
             query_idx,
         }
     }
 
     pub fn uri(&self) -> &str {
         if let Some(i) = self.query_idx {
-            &self.target[..i]
+            &self.path[..i]
         } else {
-            &self.target
+            &self.path
         }
     }
 
     pub fn query(&self) -> Option<&str> {
         if let Some(i) = self.query_idx {
-            Some(&self.target[i + 1..])
+            Some(&self.path[i + 1..])
         } else {
             None
         }

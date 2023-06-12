@@ -1,23 +1,23 @@
-use crate::{header::HttpHeader, http_version::HttpVersion, method::HttpMethod};
+use crate::{header::HttpHeader, http_version::HttpVersion, method::HttpMethod, path::Path};
 
 /// An incoming HTTP request.
 #[derive(Clone)]
 pub struct HttpRequest {
     method: HttpMethod,
-    target: String,
+    path: Path,
     http_version: HttpVersion,
     headers: Vec<HttpHeader>,
     body: String,
+    params: Option<Vec<String>>,
 }
 
 impl HttpRequest {
-    // TODO: HTTP version handling and code refactoring
     /// Parses an incoming HTTP request from `&str`
     pub fn new(raw_request: &str) -> Result<Self, &str> {
         let mut lines = raw_request.lines();
 
         let request_line = lines.next().ok_or("Invalid request")?;
-        let (method, target, http_version) = Self::parse_request_line(request_line)?;
+        let (method, path, http_version) = Self::parse_request_line(request_line)?;
 
         let mut headers = Vec::new();
         for header_line in lines.by_ref() {
@@ -34,17 +34,18 @@ impl HttpRequest {
         let body = lines.collect::<Vec<_>>().join("\n");
         Ok(Self {
             method,
-            target,
+            path,
             http_version,
             headers,
             body,
+            params: None,
         })
     }
 
-    fn parse_request_line(line: &str) -> Result<(HttpMethod, String, HttpVersion), &str> {
+    fn parse_request_line(line: &str) -> Result<(HttpMethod, Path, HttpVersion), &str> {
         let mut parts = line.split(' ');
         let method = parts.next().ok_or("Invalid request method")?;
-        let target = parts.next().ok_or("Invalid request path")?.to_string();
+        let path = Path::new(parts.next().ok_or("Invalid request path")?.to_string());
         let http_version = match parts.next().ok_or("Invalid HTTP version")? {
             "HTTP/0.9" => HttpVersion::new(0, 9),
             "HTTP/1.0" => HttpVersion::new(1, 0),
@@ -53,7 +54,7 @@ impl HttpRequest {
             _ => return Err("Invalid HTTP version"),
         };
 
-        Ok((HttpMethod::from(method), target, http_version))
+        Ok((HttpMethod::from(method), path, http_version))
     }
 
     /// Returns the request's method
@@ -62,8 +63,8 @@ impl HttpRequest {
     }
 
     /// Returns the request's target path
-    pub fn target(&self) -> &str {
-        &self.target
+    pub fn path(&self) -> &Path {
+        &self.path
     }
 
     /// Returns the request's HTTP version

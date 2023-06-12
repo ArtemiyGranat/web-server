@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use web_server::{header::HttpHeader, request::HttpRequest};
+    use web_server::{header::HttpHeader, request::HttpRequest, path::Path};
 
     #[test]
     fn request_body_test() {
@@ -32,6 +32,6 @@ mod tests {
     fn request_target_test() {
         let raw_request = "GET / HTTP/1.1\r\nHost: localhost\r\nContent-Type: text/plain\r\nContent-Length: 13\r\n\r\nHello, world!";
         let request = HttpRequest::new(raw_request).unwrap();
-        assert_eq!(request.target(), "/");
+        assert_eq!(request.path(), &Path::new("/".to_string()));
     }
 }

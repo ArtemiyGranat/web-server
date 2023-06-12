@@ -1,16 +1,17 @@
 use crate::{
-    method::HttpMethod, request::HttpRequest, response::HttpResponse, status_code::HttpStatusCode,
+    method::HttpMethod, path::Path, request::HttpRequest, response::HttpResponse,
+    status_code::HttpStatusCode,
 };
 use std::collections::HashMap;
 
 #[derive(PartialEq, Eq, Hash)]
 struct RouteKey {
     method: HttpMethod,
-    target: String,
+    target: Path,
 }
 
 impl RouteKey {
-    fn new(method: HttpMethod, target: String) -> Self {
+    fn new(method: HttpMethod, target: Path) -> Self {
         Self { method, target }
     }
 }
@@ -38,7 +39,7 @@ impl Router {
         target: &str,
         handler: fn(HttpRequest) -> HttpResponse,
     ) {
-        let route_key = RouteKey::new(method, target.to_string());
+        let route_key = RouteKey::new(method, Path::new(target.to_string()));
         self.routes.insert(route_key, handler);
     }
 
@@ -47,7 +48,7 @@ impl Router {
     pub fn handle_request(&self, request: &HttpRequest) -> HttpResponse {
         match request.method() {
             HttpMethod::Get => {
-                let route_key = RouteKey::new(HttpMethod::Get, request.target().to_string());
+                let route_key = RouteKey::new(HttpMethod::Get, request.path().clone());
                 match self.routes.get(&route_key) {
                     Some(handler) => handler(request.clone()),
                     None => HttpResponse::new(
