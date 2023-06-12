@@ -43,20 +43,14 @@ impl Router {
         self.routes.insert(route_key, handler);
     }
 
-    // TODO: Add method not allowed or bad request or smth
     /// Handles the incoming `Request` and returns `Response`.
     pub fn handle_request(&self, request: &HttpRequest) -> HttpResponse {
         if let Some(path) = self.find_matching_path(request.path()) {
-            match request.method() {
-                HttpMethod::Get => {
-                    let route_key = RouteKey::new(HttpMethod::Get, path.clone());
-                    if let Some(handler) = self.routes.get(&route_key) {
-                        return handler(request.clone());
-                    }
-                    HttpResponse::new(HttpStatusCode::NOT_FOUND)
-                }
-                _ => HttpResponse::new(HttpStatusCode::BAD_REQUEST),
+            let route_key = RouteKey::new(HttpMethod::Get, path.clone());
+            if let Some(handler) = self.routes.get(&route_key) {
+                return handler(request.clone());
             }
+            HttpResponse::new(HttpStatusCode::NOT_FOUND)
         } else {
             HttpResponse::new(HttpStatusCode::BAD_REQUEST)
         }
