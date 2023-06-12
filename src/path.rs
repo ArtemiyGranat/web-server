@@ -1,5 +1,8 @@
+use std::fmt;
+
 #[derive(Clone, Eq, PartialEq, Hash, Debug)]
 pub struct Path {
+    path: String,
     parts: Vec<String>,
     queries: Vec<(String, String)>,
 }
@@ -31,31 +34,35 @@ impl Path {
                 .collect();
         }
 
-        Self { parts, queries }
+        Self { path, parts, queries }
     }
 
     pub fn matches_route(&self, route: &Path) -> bool {
-        let route_parts = &route.parts;
-        let path_parts = &self.parts;
+        let route_parts = &self.parts;
+        let request_path_parts = &route.parts;
 
-        if route_parts.len() != path_parts.len() {
+        if request_path_parts.len() != route_parts.len() {
             return false;
         }
 
-        for (route_part, path_part) in route_parts.iter().zip(path_parts.iter()) {
-            if !Self::matches_part(route_part, path_part) {
+        for (request_path_part, route_part) in request_path_parts.iter().zip(route_parts.iter()) {
+            if !Self::matches_part(route_part, request_path_part) {
                 return false;
             }
         }
-
         true
     }
 
     fn matches_part(route_part: &str, path_part: &str) -> bool {
         if route_part.starts_with('{') && route_part.ends_with('}') {
-            true
-        } else {
-            route_part == path_part
+            return true;
         }
+        route_part == path_part
+    }
+}
+
+impl fmt::Display for Path {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.path)
     }
 }

@@ -85,7 +85,7 @@ impl Logger {
             "[{}] Incoming request: {} {}",
             addr,
             request.method().as_str(),
-            request.target()
+            request.path()
         );
         self.info(&msg);
     }
