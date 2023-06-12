@@ -43,6 +43,7 @@ impl Router {
         self.routes.insert(route_key, handler);
     }
 
+    // TODO: Add Bad Request handling
     /// Handles the incoming `Request` and returns `Response`.
     pub fn handle_request(&self, request: &HttpRequest) -> HttpResponse {
         if let Some(path) = self.find_matching_path(request.path()) {
@@ -52,7 +53,7 @@ impl Router {
             }
             HttpResponse::new(HttpStatusCode::NOT_FOUND)
         } else {
-            HttpResponse::new(HttpStatusCode::BAD_REQUEST)
+            HttpResponse::new(HttpStatusCode::NOT_FOUND)
         }
     }
 
