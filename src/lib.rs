@@ -40,6 +40,7 @@ pub mod request;
 pub mod response;
 pub mod router;
 pub mod status_code;
+pub mod path;
 mod utils;
 
 /// An HTTP server.
